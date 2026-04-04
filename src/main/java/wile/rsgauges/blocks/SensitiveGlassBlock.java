@@ -3,11 +3,6 @@
  * @author Stefan Wilhelm (wile)
  * @copyright (C) 2018 Stefan Wilhelm
  * @license MIT (see https://opensource.org/licenses/MIT)
- *
- * Class representing full, transparent blocks with different
- * look depending on the redstone power they receive.
- *
- * Light handling see Mojang Redstone Lamp.
  */
 package wile.rsgauges.blocks;
 
@@ -16,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -31,41 +26,38 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.ColorUtils;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-
 public class SensitiveGlassBlock extends RsBlock
 {
   public static final BooleanProperty POWERED = BooleanProperty.create("powered");
   public static final ColorUtils.DyeColorProperty COLOR = ColorUtils.DyeColorProperty.create("color");
 
-  // -------------------------------------------------------------------------------------------------------------------
-
   public SensitiveGlassBlock(BlockBehaviour.Properties properties)
   {
-    super(RSBLOCK_CONFIG_TRANSLUCENT, properties, Auxiliaries.getPixeledAABB(0, 0, 0, 16, 16,16 ));
-    registerDefaultState(super.defaultBlockState().setValue(POWERED, false).setValue(COLOR, DyeColor.WHITE));
+    super(RSBLOCK_CONFIG_TRANSLUCENT, properties, Auxiliaries.getPixeledAABB(0, 0, 0, 16, 16, 16));
+    registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(COLOR, DyeColor.WHITE));
   }
-
-  @Override
-  @Nullable
-  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-  { return null; }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
-  // Light reduction
+  // 1.21.1 Update: RsBlock verlangt die Implementation von EntityBlock, auch wenn wir hier keines brauchen
+  @Override
+  @Nullable
+  public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+  { return null; }
+
+  @Override
   @OnlyIn(Dist.CLIENT)
-  @SuppressWarnings("deprecation")
-  public float getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos)
+  protected float getShadeBrightness(BlockState state, BlockGetter world, BlockPos pos)
   { return 0.95f; }
 
   @Override
@@ -74,18 +66,15 @@ public class SensitiveGlassBlock extends RsBlock
 
   @Override
   @OnlyIn(Dist.CLIENT)
-  @SuppressWarnings("deprecation")
   public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side)
   {
-    if((!(adjacentBlockState.getBlock() instanceof SensitiveGlassBlock))) return false;
-    return (adjacentBlockState.getValue(POWERED) == state.getValue(POWERED));
+    if(!(adjacentBlockState.getBlock() instanceof SensitiveGlassBlock)) return false;
+    return (adjacentBlockState.getValue(POWERED).equals(state.getValue(POWERED)));
   }
 
   @Override
   public boolean isPossibleToRespawnInThis(BlockState state)
-  {
-    return false;
-  }
+  { return false; }
 
   @Override
   public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side)
@@ -98,8 +87,7 @@ public class SensitiveGlassBlock extends RsBlock
   @Override
   public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random)
   {
-    if(world.isClientSide()) return;
-    if(state.getValue(POWERED) && (!(world.hasNeighborSignal(pos)))) {
+    if(state.getValue(POWERED) && (!world.hasNeighborSignal(pos))) {
       world.setBlock(pos, state.setValue(POWERED, false), 1|2|8|16);
     }
   }
@@ -112,17 +100,18 @@ public class SensitiveGlassBlock extends RsBlock
   public BlockState getStateForPlacement(BlockPlaceContext context)
   {
     final BlockState state = super.getStateForPlacement(context);
-    return (state==null) ? (null) : (state.setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos())));
+    return (state == null) ? null : state.setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
   }
 
+  // 1.21.1 Update: useItemOn statt use() mit korrekten ItemInteractionResult-Rückgaben
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+  protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
   {
-    final ItemStack stack = player.getItemInHand(hand);
     Optional<DyeColor> dye = ColorUtils.getColorFromDyeItem(stack);
-    if(dye.isEmpty()) return InteractionResult.PASS;
+    if(dye.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
     world.setBlock(pos, state.setValue(COLOR, dye.get()), 1|2);
-    return world.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    return world.isClientSide() ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
   }
 
   @Override
@@ -138,5 +127,4 @@ public class SensitiveGlassBlock extends RsBlock
       world.scheduleTick(pos, this, 4);
     }
   }
-
 }

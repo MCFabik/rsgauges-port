@@ -11,7 +11,8 @@ package wile.rsgauges.libmc.detail;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -40,7 +41,8 @@ public class SidedProxy
 
   // --------------------------------------------------------------------------------------------------------
 
-  private static final ISidedProxy proxy = DistExecutor.unsafeRunForDist(()->ClientProxy::new, ()->ServerProxy::new);
+  // In NeoForge 1.21.1 nutzen wir direkt FMLEnvironment.dist anstelle des veralteten DistExecutors
+  private static final ISidedProxy proxy = (FMLEnvironment.dist == Dist.CLIENT) ? new ClientProxy() : new ServerProxy();
 
   private interface ISidedProxy
   {
@@ -53,15 +55,23 @@ public class SidedProxy
 
   private static final class ClientProxy implements ISidedProxy
   {
+    @Override
     public @Nullable Player getPlayerClientSide() { return Minecraft.getInstance().player; }
+
+    @Override
     public @Nullable Level getWorldClientSide() { return Minecraft.getInstance().level; }
+
+    @Override
     public @Nullable Minecraft mc() { return Minecraft.getInstance(); }
+
+    @Override
     public Optional<Boolean> isCtrlDown() { return Optional.of(Auxiliaries.isCtrlDown()); }
+
+    @Override
     public Optional<Boolean> isShiftDown() { return Optional.of(Auxiliaries.isShiftDown()); }
   }
 
   private static final class ServerProxy implements ISidedProxy
   {
   }
-
 }

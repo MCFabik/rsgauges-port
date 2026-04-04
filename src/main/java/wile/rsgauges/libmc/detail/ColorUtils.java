@@ -3,8 +3,6 @@
  * @author Stefan Wilhelm (wile)
  * @copyright (C) 2019 Stefan Wilhelm
  * @license MIT (see https://opensource.org/licenses/MIT)
- *
- * Encapsulates colour handling for blocks and their item representations.
  */
 package wile.rsgauges.libmc.detail;
 
@@ -20,10 +18,9 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.common.Tags;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -32,21 +29,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-
 public final class ColorUtils
 {
   /**
-   * Vanilla interface wrapper allowing to filter the tintable blocks during color handler registration.
+   * Vanilla interface wrapper allowing to filter the tintable blocks.
    */
   public interface IBlockColorTintSupport extends BlockColor
   {
     default boolean hasColorTint() { return false; }
+    @Override
     default int getColor(BlockState state, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos, int tintIndex) { return 0xffffffff; }
   }
 
   public interface IItemColorTintSupport extends ItemColor
   {
     default boolean hasColorTint() { return false; }
+    @Override
     default int getColor(ItemStack stack, int tintIndex) { return 0xffffffff; }
   }
 
@@ -59,11 +57,13 @@ public final class ColorUtils
   @OnlyIn(Dist.CLIENT)
   public static void registerBlockColourHandlers(final RegisterColorHandlersEvent.Block event)
   {
-    if(!blocks_supplier_.get().isEmpty()) {
-      event.getBlockColors().register(
-        (state, world, pos, tintIndex) -> (((IBlockColorTintSupport)state.getBlock()).getColor(state, world, pos, tintIndex)), // handler
-        (blocks_supplier_.get().stream()
-                .filter(b->((b instanceof IBlockColorTintSupport) && (((IBlockColorTintSupport)b).hasColorTint()))).toList()).toArray(new Block[]{}) // supporting blocks
+    List<Block> blocks = blocks_supplier_.get().stream()
+            .filter(b -> (b instanceof IBlockColorTintSupport && ((IBlockColorTintSupport)b).hasColorTint()))
+            .toList();
+    if(!blocks.isEmpty()) {
+      event.register(
+              (state, world, pos, tintIndex) -> (((IBlockColorTintSupport)state.getBlock()).getColor(state, world, pos, tintIndex)),
+              blocks.toArray(new Block[0])
       );
     }
   }
@@ -71,11 +71,13 @@ public final class ColorUtils
   @OnlyIn(Dist.CLIENT)
   public static void registerItemColourHandlers(final RegisterColorHandlersEvent.Item event)
   {
-    if(!items_supplier_.get().isEmpty()) {
-      event.getItemColors().register(
-        (ItemStack stack, int tintIndex) -> (((IItemColorTintSupport)(stack.getItem())).getColor(stack, tintIndex)),
-        items_supplier_.get().stream()
-                .filter(e->((e instanceof IItemColorTintSupport) && (((IItemColorTintSupport)e).hasColorTint()))).toList().toArray(new ItemLike[]{})
+    List<Item> items = items_supplier_.get().stream()
+            .filter(e -> (e instanceof IItemColorTintSupport && ((IItemColorTintSupport)e).hasColorTint()))
+            .toList();
+    if(!items.isEmpty()) {
+      event.register(
+              (ItemStack stack, int tintIndex) -> (((IItemColorTintSupport)(stack.getItem())).getColor(stack, tintIndex)),
+              items.toArray(new ItemLike[0])
       );
     }
   }
@@ -86,7 +88,7 @@ public final class ColorUtils
 
   public static class DyeColorProperty extends EnumProperty<DyeColor>
   {
-    public DyeColorProperty(String name)
+    protected DyeColorProperty(String name)
     { super(name, DyeColor.class, Arrays.asList(DyeColor.values())); }
 
     public static DyeColorProperty create(String name)
@@ -99,24 +101,26 @@ public final class ColorUtils
   public static Optional<DyeColor> getColorFromDyeItem(ItemStack stack)
   {
     final Item item = stack.getItem();
-    if(item instanceof DyeItem) return Optional.of(((DyeItem)item).getDyeColor());
-    // There must be a standard for that somewhere ...
-    if(stack.is(Tags.Items.DYES_BLACK)) return Optional.of(DyeColor.BLACK);
-    if(stack.is(Tags.Items.DYES_RED)) return Optional.of(DyeColor.RED);
-    if(stack.is(Tags.Items.DYES_GREEN)) return Optional.of(DyeColor.GREEN);
-    if(stack.is(Tags.Items.DYES_BROWN)) return Optional.of(DyeColor.BROWN);
-    if(stack.is(Tags.Items.DYES_BLUE)) return Optional.of(DyeColor.BLUE);
-    if(stack.is(Tags.Items.DYES_PURPLE)) return Optional.of(DyeColor.PURPLE);
-    if(stack.is(Tags.Items.DYES_CYAN)) return Optional.of(DyeColor.CYAN);
-    if(stack.is(Tags.Items.DYES_LIGHT_GRAY)) return Optional.of(DyeColor.LIGHT_GRAY);
-    if(stack.is(Tags.Items.DYES_GRAY)) return Optional.of(DyeColor.GRAY);
-    if(stack.is(Tags.Items.DYES_PINK)) return Optional.of(DyeColor.PINK);
-    if(stack.is(Tags.Items.DYES_LIME)) return Optional.of(DyeColor.LIME);
-    if(stack.is(Tags.Items.DYES_YELLOW)) return Optional.of(DyeColor.YELLOW);
-    if(stack.is(Tags.Items.DYES_LIGHT_BLUE)) return Optional.of(DyeColor.LIGHT_BLUE);
-    if(stack.is(Tags.Items.DYES_MAGENTA)) return Optional.of(DyeColor.MAGENTA);
-    if(stack.is(Tags.Items.DYES_ORANGE)) return Optional.of(DyeColor.ORANGE);
-    if(stack.is(Tags.Items.DYES_WHITE)) return Optional.of(DyeColor.WHITE);
+    if(item instanceof DyeItem dyeItem) return Optional.of(dyeItem.getDyeColor());
+
+    // NeoForge Conventional Tags 1.21.1
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_BLACK)) return Optional.of(DyeColor.BLACK);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_RED)) return Optional.of(DyeColor.RED);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_GREEN)) return Optional.of(DyeColor.GREEN);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_BROWN)) return Optional.of(DyeColor.BROWN);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_BLUE)) return Optional.of(DyeColor.BLUE);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_PURPLE)) return Optional.of(DyeColor.PURPLE);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_CYAN)) return Optional.of(DyeColor.CYAN);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_LIGHT_GRAY)) return Optional.of(DyeColor.LIGHT_GRAY);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_GRAY)) return Optional.of(DyeColor.GRAY);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_PINK)) return Optional.of(DyeColor.PINK);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_LIME)) return Optional.of(DyeColor.LIME);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_YELLOW)) return Optional.of(DyeColor.YELLOW);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_LIGHT_BLUE)) return Optional.of(DyeColor.LIGHT_BLUE);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_MAGENTA)) return Optional.of(DyeColor.MAGENTA);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_ORANGE)) return Optional.of(DyeColor.ORANGE);
+    if(stack.is(net.neoforged.neoforge.common.Tags.Items.DYES_WHITE)) return Optional.of(DyeColor.WHITE);
+
     return Optional.empty();
   }
 
@@ -148,14 +152,13 @@ public final class ColorUtils
     { return byIndex_[idx & 0xf]; }
 
     public static final int[] lightTintByIndex_ = {
-      0xffffff,0xfcbc88,0xe8b5e4,0x9cd8ec,
-      0xffefb3,0xd2f1a7,0xfad1dd,0x97a1a5,
-      0xcececa,0x67e9e9,0xcc9fe5,0x959ada,
-      0xd1a585,0xc4e774,0xe79792,0x808080
+            0xffffff,0xfcbc88,0xe8b5e4,0x9cd8ec,
+            0xffefb3,0xd2f1a7,0xfad1dd,0x97a1a5,
+            0xcececa,0x67e9e9,0xcc9fe5,0x959ada,
+            0xd1a585,0xc4e774,0xe79792,0x808080
     };
 
     public static int lightTintByIndex(int idx)
     { return lightTintByIndex_[idx & 0xf]; }
-
   }
 }

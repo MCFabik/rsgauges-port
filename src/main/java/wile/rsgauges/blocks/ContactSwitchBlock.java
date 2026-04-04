@@ -33,10 +33,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -163,7 +163,7 @@ public class ContactSwitchBlock extends SwitchBlock
     { super(te_type, pos, state); }
 
     public ContactSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_CONTACT_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("tet_contact_switch"), pos, state); }
 
     public int filter()
     { return filter_; }
@@ -224,9 +224,9 @@ public class ContactSwitchBlock extends SwitchBlock
         direction = ((y>=13) && (y<=15)) ? (1) : (((y>=10) && (y<=12)) ? (-1) : (0));
         field = ((x>=9.5) && (x<=10.1)) ? (1) : (
                 ((x>=10.9) && (x<=11.7)) ? (2) : (
-                ((x>=12.2) && (x<=13.0)) ? (3) : (
-                ((x>=13.5) && (x<=14.2)) ? (4) : (0)
-                )));
+                        ((x>=12.2) && (x<=13.0)) ? (3) : (
+                                ((x>=13.5) && (x<=14.2)) ? (4) : (0)
+                        )));
       }
       if((direction==0) || (field==0)) return false;
       if(!show_only) {
@@ -240,16 +240,16 @@ public class ContactSwitchBlock extends SwitchBlock
       }
       {
         Overlay.show(player,
-          (Component.literal(""))
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity", ChatFormatting.BLUE, new Object[]{
-                Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity." + (high_sensitivity() ? "high":"normal"))
-              }))
-            .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_threshold", ChatFormatting.YELLOW, new Object[]{entity_count_threshold()}))
-            .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_filter", ChatFormatting.DARK_GREEN, new Object[]{Component.translatable("rsgauges.switchconfig.touchcontactmat.entity_filter."+filter_class_names[filter_])}))
-            .append(" | ")
-            .append(Auxiliaries.localizable("switchconfig.touchcontactmat.output_power", ChatFormatting.RED, new Object[]{setpower()}))
+                (Component.literal(""))
+                        .append(Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity", ChatFormatting.BLUE, new Object[]{
+                                Auxiliaries.localizable("switchconfig.touchcontactmat.sensitivity." + (high_sensitivity() ? "high":"normal"))
+                        }))
+                        .append(" | ")
+                        .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_threshold", ChatFormatting.YELLOW, new Object[]{entity_count_threshold()}))
+                        .append(" | ")
+                        .append(Auxiliaries.localizable("switchconfig.touchcontactmat.entity_filter", ChatFormatting.DARK_GREEN, new Object[]{Component.translatable("rsgauges.switchconfig.touchcontactmat.entity_filter."+filter_class_names[filter_])}))
+                        .append(" | ")
+                        .append(Auxiliaries.localizable("switchconfig.touchcontactmat.output_power", ChatFormatting.RED, new Object[]{setpower()}))
         );
       }
       return true;

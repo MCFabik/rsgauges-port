@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -59,12 +59,12 @@ public class DoorSensorSwitchBlock extends SwitchBlock
     { super(te_type, pos, state); }
 
     public DoorSensorSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_DOORSENSOR_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_doorsensor_switch"), pos, state); } // FIX: tet_ zu te_ geändert
 
     @Override
     public void tick()
     {
-      if(level.isClientSide() || (--update_timer_ > 0)) return;
+      if(level == null || level.isClientSide() || (--update_timer_ > 0)) return;
       update_timer_ = 4;
       final BlockState state = level.getBlockState(getBlockPos());
       if((state==null) || (!(state.getBlock() instanceof final DoorSensorSwitchBlock block))) return;

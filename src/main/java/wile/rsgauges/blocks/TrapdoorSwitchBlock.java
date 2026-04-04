@@ -35,11 +35,10 @@ public class TrapdoorSwitchBlock extends ContactSwitchBlock
   // Block overrides
   // -------------------------------------------------------------------------------------------------------------------
 
+  // 1.21.1 Update: Signatur von isPathfindable hat sich geändert (BlockGetter und BlockPos wurden entfernt)
   @Override
-  @SuppressWarnings("deprecation")
-  public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type)
+  protected boolean isPathfindable(BlockState state, PathComputationType type)
   {
-    /// -> was public boolean isPassable(LevelReader world, BlockPos pos)
     return switch (type) {
       case LAND, AIR -> (!state.getValue(POWERED));
       default -> true;

@@ -28,7 +28,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 
-
 public abstract class RsDirectedBlock extends RsBlock
 {
   public static final long RSBLOCK_CONFIG_WALLMOUNT         = 0x4000000000000000l;
@@ -43,7 +42,7 @@ public abstract class RsDirectedBlock extends RsBlock
 
   public RsDirectedBlock(long config, BlockBehaviour.Properties properties, @Nullable AABB aabb1, @Nullable AABB aabb2)
   {
-    super(config | (((config & RSBLOCK_CONFIG_TRANSLUCENT)==0) && ((aabb1.getXsize()<0.99) || (aabb1.getYsize()<0.99) || (aabb1.getXsize()<0.99)) ? RSBLOCK_CONFIG_CUTOUT : 0), properties);
+    super(config | (((config & RSBLOCK_CONFIG_TRANSLUCENT)==0) && (aabb1 != null) && ((aabb1.getXsize()<0.99) || (aabb1.getYsize()<0.99) || (aabb1.getZsize()<0.99)) ? RSBLOCK_CONFIG_CUTOUT : 0), properties);
     registerDefaultState(super.defaultBlockState().setValue(FACING, Direction.SOUTH));
     VoxelShape[][] shapes = new VoxelShape[Direction.values().length][2];
     if(aabb1==null) aabb1 = new AABB(0,0,0,1,1,1);
@@ -51,30 +50,23 @@ public abstract class RsDirectedBlock extends RsBlock
     for(int i_dir=0; i_dir<Direction.values().length; ++i_dir) {
       for(int i_pow=0; i_pow<2; ++i_pow) {
         AABB bb = (i_pow==0) ? aabb1 : aabb2;
+
         if((config & RSBLOCK_CONFIG_LATERAL) == 0) {
-          // Wall attached blocks where the UI is facing to the player.
+          // REGEL 1: Normale Schalter & Anzeigen (SÜDEN ist die Grundausrichtung)
           switch (i_dir) {
             case 0 -> bb = new AABB(1 - bb.maxX, 1 - bb.maxZ, 1 - bb.maxY, 1 - bb.minX, 1 - bb.minZ, 1 - bb.minY);
-            // D
             case 1 -> bb = new AABB(1 - bb.maxX, bb.minZ, bb.minY, 1 - bb.minX, bb.maxZ, bb.maxY);
-            // U
             case 2 -> bb = new AABB(1 - bb.maxX, bb.minY, 1 - bb.maxZ, 1 - bb.minX, bb.maxY, 1 - bb.minZ);
-            // N
-            case 3 -> bb = new AABB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
-            // S --> bb
+            case 3 -> bb = new AABB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ); // SOUTH = Identity
             case 4 -> bb = new AABB(1 - bb.maxZ, bb.minY, bb.minX, 1 - bb.minZ, bb.maxY, bb.maxX);
-            // W
             case 5 -> bb = new AABB(bb.minZ, bb.minY, 1 - bb.maxX, bb.maxZ, bb.maxY, 1 - bb.minX);
-            // E
           }
         } else {
-          // Wall or floor attached blocks where the UI and actuated facing is on the top.
-          // E
-          bb = switch (i_dir) { // U --> bb
-            // N --> bb
-            case 0, 1, 2 -> new AABB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ); // D --> bb
-            case 3 -> new AABB(1 - bb.maxX, bb.minY, 1 - bb.maxZ, 1 - bb.minX, bb.maxY, 1 - bb.minZ); // S
-            case 4 -> new AABB(bb.minZ, bb.minY, 1 - bb.maxX, bb.maxZ, bb.maxY, 1 - bb.minX); // W
+          // REGEL 2: Lateral-Blöcke (Türsensor, Falltüren, Bodenmatten) (NORDEN ist die Grundausrichtung)
+          bb = switch (i_dir) {
+            case 0, 1, 2 -> new AABB(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ); // NORTH = Identity
+            case 3 -> new AABB(1 - bb.maxX, bb.minY, 1 - bb.maxZ, 1 - bb.minX, bb.maxY, 1 - bb.minZ);
+            case 4 -> new AABB(bb.minZ, bb.minY, 1 - bb.maxX, bb.maxZ, bb.maxY, 1 - bb.minX);
             case 5 -> new AABB(1 - bb.maxZ, bb.minY, bb.minX, 1 - bb.minZ, bb.maxY, bb.maxX);
             default -> bb;
           };
@@ -112,12 +104,14 @@ public abstract class RsDirectedBlock extends RsBlock
     final BlockState state = super.getStateForPlacement(context);
     if(state==null) return null;
     Direction facing;
+    Direction clickedFace = context.getClickedFace();
+
     if(isWallMount() && (!isLateral())) {
-      facing = context.getClickedFace(); // e.g. pulse/bistable switches. Placed on the wall with the ui facing to the player.
+      facing = clickedFace; // Normale Schalter
     } else if(isWallMount() && isLateral()) {
-      facing = context.getClickedFace().getOpposite(); // e.g. trap door switch. Placed on the wall the player clicked, reverse orientation.
+      facing = clickedFace.getOpposite(); // Türsensoren & Falltüren müssen umgedreht werden
     } else if((!isWallMount()) && isLateral()) {
-      facing = context.getHorizontalDirection(); // e.g. contact mats or full blocks, placed in the direction the player is looking.
+      facing = context.getHorizontalDirection(); // Bodenmatten
     } else {
       facing = context.getNearestLookingDirection();
     }
@@ -131,9 +125,11 @@ public abstract class RsDirectedBlock extends RsBlock
   {
     if(isCube() || ((!world.isEmptyBlock(facingPos)) && (!facingState.liquid()))) return state;
     Direction blockfacing = state.getValue(FACING);
-    if((!isWallMount()) && (isLateral()) && (facing==Direction.DOWN)) return Blocks.AIR.defaultBlockState(); // floor mount, e.g. contact mats
-    if(isWallMount() && (!isLateral()) && (facing==state.getValue(FACING).getOpposite())) return Blocks.AIR.defaultBlockState(); // wallmount are placed facing the player
-    if(isWallMount() && (isLateral()) && (facing==state.getValue(FACING))) return Blocks.AIR.defaultBlockState();  // trapdoors etc are placed facing the neighbour block
+    if((!isWallMount()) && (isLateral()) && (facing==Direction.DOWN)) return Blocks.AIR.defaultBlockState();
+
+    // Die Abbruchbedingung muss ebenfalls die zwei verschiedenen Regeln beachten!
+    if(isWallMount() && (!isLateral()) && (facing==blockfacing.getOpposite())) return Blocks.AIR.defaultBlockState();
+    if(isWallMount() && (isLateral()) && (facing==blockfacing)) return Blocks.AIR.defaultBlockState();
     return state;
   }
 
@@ -141,71 +137,42 @@ public abstract class RsDirectedBlock extends RsBlock
   // Mod specific
   // -------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * Overridden to indicate that the block is attached to a wall. getBoundingBox() and
-   * getStateForPlacement() will return differently accordingly.
-   */
   public boolean isWallMount()
   { return (config & RSBLOCK_CONFIG_WALLMOUNT) != 0; }
 
-  /**
-   * Overridden to indicate that the block is attached to the floor. getBoundingBox() and
-   * getStateForPlacement() will return differently accordingly.
-   */
   public boolean isLateral()
   { return (config & RSBLOCK_CONFIG_LATERAL) != 0; }
 
-  /**
-   * Overridden to indicate that the block is a standard cube, cannot be washed off, and is
-   * not explicitly attached to another block, so that it would pop off when that block,
-   * is destroyed. Also implies Block class overrides for cubes.
-   */
   public boolean isCube()
   { return (config & (RSBLOCK_CONFIG_LATERAL|RSBLOCK_CONFIG_WALLMOUNT)) == 0; }
 
   public boolean isOpositePlacement()
   { return (config & (RSBLOCK_CONFIG_OPOSITE_PLACEMENT)) != 0; }
 
-  /**
-   * Checks if the changed neighbour is the block where the gauge/switch/device
-   * is attached to. If this block cannot hold the device (air, water...), then
-   * the device pop off and dropped as item.
-   * Returns true if the neighbour block change may affect the state of the device.
-   */
   protected boolean isAffectedByNeigbour(BlockState state, LevelAccessor world, BlockPos pos, BlockPos neighborPos)
   {
     if(isCube()) return true;
     if((!isWallMount()) && (!(pos.below().equals(neighborPos)))) return false;
-    if((!isLateral()) && (!pos.relative(state.getValue(FACING).getOpposite()).equals(neighborPos))) return false;
-    if(!pos.relative(state.getValue(FACING).getOpposite()).equals(neighborPos)) return false;
+
+    // Auch die Nachbar-Block-Erkennung muss die zwei Regeln anwenden
+    if(isWallMount() && (!isLateral()) && (!pos.relative(state.getValue(FACING).getOpposite()).equals(neighborPos))) return false;
+    if(isWallMount() && isLateral() && (!pos.relative(state.getValue(FACING)).equals(neighborPos))) return false;
+
     final BlockState neighborState = world.getBlockState(neighborPos);
     if(neighborState == null) return false;
     if((world.isEmptyBlock(neighborPos)) || (neighborState.liquid())) return false;
     return true;
   }
 
-  /**
-   * Lookup table for fast transformation from placed block facing to the absolute world facing.
-   */
   private static final Direction[][] facing_transform_lut = {
-    { Direction.SOUTH, Direction.NORTH, Direction.UP, Direction.DOWN, Direction.WEST, Direction.EAST }, // DOWN
-    { Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP, Direction.WEST, Direction.EAST }, // UP
-    { Direction.DOWN, Direction.UP, Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST }, // NORTH
-    { Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST }, // SOUTH
-    { Direction.DOWN, Direction.UP, Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH }, // WEST
-    { Direction.DOWN, Direction.UP, Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH }  // EAST
+          { Direction.SOUTH, Direction.NORTH, Direction.UP, Direction.DOWN, Direction.WEST, Direction.EAST }, // DOWN
+          { Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP, Direction.WEST, Direction.EAST }, // UP
+          { Direction.DOWN, Direction.UP, Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST }, // NORTH
+          { Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST }, // SOUTH
+          { Direction.DOWN, Direction.UP, Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH }, // WEST
+          { Direction.DOWN, Direction.UP, Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH }  // EAST
   };
 
-  /**
-   * Transforms a facing from the relative side (front, back, left, right, top, bottom)
-   * to an absolute direction (north, south ...). The convention for the relative side
-   * is: front=south, hence back=north, right=east, left=west, top=up, bottom=down. This
-   * is not standard (like e.g. a furnace), but fatilitates model design (e.g. blockbench:
-   * looking north/having xy as known from 2D coord systems means that the front of the
-   * device is looking towards you) and player perspective (the front is facing the player
-   * when the block is placed, left and right etc is from the player perspective when
-   * standing in front of the device).
-   */
   protected Direction getAbsoluteFacing(BlockState state, Direction relativeSide)
   { return ((state==null) || (relativeSide==null)) ? Direction.NORTH : facing_transform_lut[state.getValue(FACING).get3DDataValue()][relativeSide.get3DDataValue()]; }
 
@@ -214,13 +181,14 @@ public abstract class RsDirectedBlock extends RsBlock
     if(isCube()) {
       return true;
     } else if(isLateral() && (!isWallMount())) {
-      if(side != Direction.UP) return false; // must be supported from the bottom.
+      if(side != Direction.UP) return false;
       if(!Block.canSupportRigidBlock(world, pos.below())) return false;
       return true;
     } else if(isWallMount()) {
-      if(isLateral() && ((side == Direction.UP) || (side == Direction.DOWN))) return false; // lateral blocks only on walls.
+      if(isLateral() && ((side == Direction.UP) || (side == Direction.DOWN))) return false;
       final BlockPos blockpos = pos.relative(side.getOpposite());
       final BlockState state = world.getBlockState(blockpos);
+      return state.isFaceSturdy(world, blockpos, side);
     }
     return true;
   }

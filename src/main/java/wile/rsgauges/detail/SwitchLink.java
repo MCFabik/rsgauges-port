@@ -17,9 +17,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import wile.rsgauges.ModConfig;
-import wile.rsgauges.ModContent;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -35,24 +37,15 @@ public class SwitchLink
   public interface ISwitchLinkable
   {
     boolean switchLinkHasTargetSupport(Level world, BlockPos pos);
-
     boolean switchLinkHasSourceSupport(Level world, BlockPos pos);
-
     boolean switchLinkHasAnalogSupport(Level world, BlockPos pos);
-
     void switchLinkUnlink(SwitchLink link);
-
     void switchLinkInit(SwitchLink link);
-
     default ImmutableList<LinkMode> switchLinkGetSupportedTargetModes()
     { return ImmutableList.of(LinkMode.AS_STATE, LinkMode.ACTIVATE, LinkMode.DEACTIVATE, LinkMode.TOGGLE, LinkMode.INV_STATE); }
-
     SwitchLink.RequestResult switchLinkTrigger(SwitchLink link);
-
     Optional<Integer> switchLinkOutputPower(Level world, BlockPos pos);
-
     Optional<Integer> switchLinkInputPower(Level world, BlockPos pos);
-
     Optional<Integer> switchLinkComparatorInput(Level world, BlockPos pos);
   }
 
@@ -75,7 +68,7 @@ public class SwitchLink
   public enum RequestResult { OK, NOT_MATCHED, INVALID_LINKDATA, TOO_FAR, TARGET_GONE, REJECTED }
 
   public final BlockPos target_position;
-  public final String block_name;         // intentionally not Block, as one could not be registered anymore.
+  public final String block_name;
   public final boolean valid;
   private long config;
   public int source_analog_power = 0;
@@ -109,22 +102,33 @@ public class SwitchLink
   { return (nbt==null) ? (new SwitchLink()) : (new SwitchLink(BlockPos.of(nbt.getLong("p")), nbt.getString("b"), nbt.getLong("t"))); }
 
   public static SwitchLink fromItemStack(ItemStack stack)
-  { return ((stack==null) || (stack.isEmpty()) || (stack.getItem()!=ModContent.SWITCH_LINK_PEARL)) ? (new SwitchLink()) : (fromNbt(stack.getTag())); }
+  {
+    if ((stack == null) || (stack.isEmpty()) || (stack.getItem() != Registries.getItem("switchlink_pearl") && stack.getItem() != Registries.getItem("switch_link_pearl"))) {
+      return new SwitchLink();
+    }
+    CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+    return fromNbt(data.copyTag());
+  }
 
+  // WIEDERHERGESTELLT: fromTargetPosition
   public static SwitchLink fromTargetPosition(final Level world, final BlockPos pos)
   {
     if(pos==null) return new SwitchLink();
     final BlockState state = world.getBlockState(pos);
     if((state==null) || (!(state.getBlock() instanceof ISwitchLinkable))) return new SwitchLink();
     if(!((ISwitchLinkable)state.getBlock()).switchLinkHasTargetSupport(world, pos)) return new SwitchLink();
-    return new SwitchLink(pos, ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString(), 0);
+    return new SwitchLink(pos, BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString(), 0);
   }
 
+  // WIEDERHERGESTELLT: fromPlayerActiveItem
   public static SwitchLink fromPlayerActiveItem(Level world, Player player)
   {
     if((player==null) || (world.isClientSide()) || (player.getInventory()==null) || (player.getInventory().getSelected()==null)) return new SwitchLink();
-    if(player.getInventory().getSelected().getItem()!=ModContent.SWITCH_LINK_PEARL) return null;
-    return SwitchLink.fromNbt(player.getInventory().getSelected().getTag());
+    ItemStack stack = player.getInventory().getSelected();
+    if(stack.isEmpty() || (stack.getItem() != Registries.getItem("switchlink_pearl") && stack.getItem() != Registries.getItem("switch_link_pearl"))) return new SwitchLink();
+
+    CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+    return SwitchLink.fromNbt(data.copyTag());
   }
 
   public CompoundTag toNbt()
@@ -138,9 +142,9 @@ public class SwitchLink
 
   public ItemStack toSwitchLinkPearl()
   {
-    ItemStack stack = new ItemStack(ModContent.SWITCH_LINK_PEARL);
+    ItemStack stack = new ItemStack(Registries.getItem("switchlink_pearl") != null ? Registries.getItem("switchlink_pearl") : Registries.getItem("switch_link_pearl"));
     stack.setCount(1);
-    stack.setTag(toNbt());
+    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(toNbt()));
     return stack;
   }
 
@@ -148,29 +152,29 @@ public class SwitchLink
   { return ((pos==null) || (!valid)) ? -1 : (int)Math.sqrt(target_position.distSqr(pos)); }
 
   public boolean isTooFar(final BlockPos pos)
-  { return (ModConfig.max_switch_linking_distance > 0) && (((distance(pos) > ModConfig.max_switch_linking_distance))); }
+  { return (ModConfig.max_switch_linking_distance() > 0) && (((distance(pos) > ModConfig.max_switch_linking_distance()))); }
 
   @SuppressWarnings("deprecation")
   @Nullable
   private ISwitchLinkable target(final Level world, final BlockPos source_pos)
   {
-    if((ModConfig.without_switch_linking) || (!valid) || isTooFar(source_pos) || (!world.hasChunkAt(target_position))) return null;
+    if((ModConfig.without_switch_linking()) || (!valid) || isTooFar(source_pos) || (!world.hasChunkAt(target_position))) return null;
     final BlockState target_state = world.getBlockState(target_position);
     final Block block = target_state.getBlock();
-    if((!(block instanceof ISwitchLinkable)) || (!ForgeRegistries.BLOCKS.getKey(block).toString().equals(block_name))) return null;
+    if((!(block instanceof ISwitchLinkable)) || (!BuiltInRegistries.BLOCK.getKey(block).toString().equals(block_name))) return null;
     return (ISwitchLinkable)block;
   }
 
   @SuppressWarnings("deprecation")
   public RequestResult trigger(final Level world, final BlockPos source_pos, final Player player)
   {
-    if(ModConfig.without_switch_linking) return RequestResult.NOT_MATCHED;
+    if(ModConfig.without_switch_linking()) return RequestResult.NOT_MATCHED;
     if((!valid) || (world.isClientSide())) return RequestResult.INVALID_LINKDATA;
     if(isTooFar(source_pos) || ((!world.hasChunkAt(target_position)))) return RequestResult.TOO_FAR;
     final BlockState target_state = world.getBlockState(target_position);
     if(target_state==null) return RequestResult.TOO_FAR;
     final Block block = target_state.getBlock();
-    if((!(block instanceof final ISwitchLinkable target)) || (!ForgeRegistries.BLOCKS.getKey(block).toString().equals(block_name))) return RequestResult.TARGET_GONE;
+    if((!(block instanceof final ISwitchLinkable target)) || (!BuiltInRegistries.BLOCK.getKey(block).toString().equals(block_name))) return RequestResult.TARGET_GONE;
     final int p = target.switchLinkOutputPower(world, target_position).orElse(0);
     this.world = world;
     this.source_position = source_pos;
@@ -191,7 +195,7 @@ public class SwitchLink
     this.source_analog_power = analog_power;
     this.source_digital_power = digital_power;
     int target_power = target.switchLinkOutputPower(world, target_position).orElse(-1);
-    if(target_power<0) return RequestResult.REJECTED; // no target support
+    if(target_power<0) return RequestResult.REJECTED;
     boolean analog = target.switchLinkHasAnalogSupport(world, target_position);
     switch (mode()) {
       case AS_STATE -> {
@@ -262,5 +266,4 @@ public class SwitchLink
     BlockState state = world.getBlockState(pos);
     return (!(state.getBlock() instanceof ISwitchLinkable)) ? Optional.empty() : ((ISwitchLinkable)(state.getBlock())).switchLinkComparatorInput(world, pos);
   }
-
 }

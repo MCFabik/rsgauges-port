@@ -3,34 +3,40 @@
  * @author Stefan Wilhelm (wile)
  * @copyright (C) 2020 Stefan Wilhelm
  * @license MIT (see https://opensource.org/licenses/MIT)
- *
- * Renders status messages in one line.
  */
 package wile.rsgauges.libmc.detail;
 
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-
+// 1.21.1 Update: bus = ... ist veraltet, NeoForge erkennt den Mod-Bus nun automatisch anhand des Events
+@EventBusSubscriber(modid = "rsgauges", value = Dist.CLIENT)
 public class Overlay
 {
   public static void register()
   {
     if(SidedProxy.mc() != null) {
-      MinecraftForge.EVENT_BUS.register(new TextOverlayGui());
       Networking.OverlayTextMessage.setHandler(TextOverlayGui::show);
     }
+  }
+
+  @SubscribeEvent
+  public static void onRegisterLayers(RegisterGuiLayersEvent event) {
+    event.registerAboveAll(
+            ResourceLocation.fromNamespaceAndPath("rsgauges", "text_overlay"),
+            TextOverlayGui::renderOverlay
+    );
   }
 
   public static void show(Player player, final Component message)
@@ -43,9 +49,8 @@ public class Overlay
   // Client side handler
   // -----------------------------------------------------------------------------
 
-  @Mod.EventBusSubscriber(Dist.CLIENT)
   @OnlyIn(Dist.CLIENT)
-  public static class TextOverlayGui extends Screen
+  public static class TextOverlayGui
   {
     private static final Component EMPTY_TEXT = Component.literal("");
     private static double overlay_y_ = 0.75;
@@ -53,9 +58,8 @@ public class Overlay
     private static int border_color_ = 0xaa333333;
     private static int background_color1_ = 0xaa333333;
     private static int background_color2_ = 0xaa444444;
-    private final Minecraft mc;
     private static long deadline_;
-    private static Component text_;
+    private static Component text_ = EMPTY_TEXT;
 
     public static void on_config(double overlay_y)
     { on_config(overlay_y, 0x00ffaa00, 0xaa333333, 0xaa333333, 0xaa444444); }
@@ -84,60 +88,32 @@ public class Overlay
     public static synchronized void show(String s, int displayTimeoutMs)
     { text_ = ((s==null)||(s.isEmpty()))?(EMPTY_TEXT):(Component.literal(s)); deadline_ = System.currentTimeMillis() + displayTimeoutMs; }
 
-    TextOverlayGui()
-    { super(Component.literal("")); mc = SidedProxy.mc(); }
-
-    @Override
-    protected void init()
-    { super.init(); }
-
-    @Override
-    public void tick()
-    { super.tick(); }
-
-    @SubscribeEvent
-    public void onRenderGui(RenderGuiOverlayEvent event)
+    // Diese Methode passt exakt auf die LayeredDraw.Layer Signatur (GuiGraphics, DeltaTracker)
+    public static void renderOverlay(GuiGraphics graphics, DeltaTracker deltaTracker)
     {
-      //if(event.getType() != RenderGameOverlayEvent.ElementType.CHAT) return;
       if(deadline() < System.currentTimeMillis()) return;
       if(text()==EMPTY_TEXT) return;
       String txt = text().getString();
       if(txt.isEmpty()) return;
 
+      Minecraft mc = Minecraft.getInstance();
       final Font fr = mc.font;
       final Window win = mc.getWindow();
-      final boolean was_unicode = fr.isBidirectional();
       final int cx = win.getGuiScaledWidth() / 2;
       final int cy = (int)(win.getGuiScaledHeight() * overlay_y_);
 
-      GuiGraphics graphics = event.getGuiGraphics();
-      float partialTick = event.getPartialTick();
-
-      render(graphics, cx, cy, partialTick);
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int cx, int cy, float partialTick)
-    {
-//      PoseStack mxs = event.getGuiGraphics().pose();
-      if(deadline() < System.currentTimeMillis()) return;
-      if(text()==EMPTY_TEXT) return;
-      String txt = text().getString();
-      if(txt.isEmpty()) return;
-
-      final Font fr = mc.font;
       final int w = fr.width(txt);
       final int h = fr.lineHeight;
 
-      graphics.hLine(cx-(w/2)-3, cx+(w/2)+2, cy-2, 0xaa333333);
-      graphics.hLine(cx-(w/2)-3, cx+(w/2)+2, cy+h+2, 0xaa333333);
-      graphics.vLine(cx-(w/2)-3, cy-2, cy+h+2, 0xaa333333);
-      graphics.vLine(cx+(w/2)+2, cy-2, cy+h+2, 0xaa333333);
-      graphics.drawCenteredString(fr, text(), cx , cy+1, 0x00ffaa00);
-      graphics.fillGradient(cx-(w/2)-3, cy-2, cx+(w/2)+2, cy+h+2, 0xaa333333, 0xaa444444);
+      // Hintergrund und Rahmen ZUERST zeichnen
+      graphics.fillGradient(cx-(w/2)-3, cy-2, cx+(w/2)+2, cy+h+2, background_color1_, background_color2_);
+      graphics.hLine(cx-(w/2)-3, cx+(w/2)+2, cy-2, border_color_);
+      graphics.hLine(cx-(w/2)-3, cx+(w/2)+2, cy+h+2, border_color_);
+      graphics.vLine(cx-(w/2)-3, cy-2, cy+h+2, border_color_);
+      graphics.vLine(cx+(w/2)+2, cy-2, cy+h+2, border_color_);
 
-      super.render(graphics, cx, cy, partialTick);
+      // Text als Letztes darüber legen
+      graphics.drawCenteredString(fr, text(), cx , cy+1, text_color_);
     }
   }
-
 }

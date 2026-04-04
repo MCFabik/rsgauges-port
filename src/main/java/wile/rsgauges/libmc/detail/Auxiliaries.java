@@ -3,8 +3,6 @@
  * @author Stefan Wilhelm (wile)
  * @copyright (C) 2020 Stefan Wilhelm
  * @license MIT (see https://opensource.org/licenses/MIT)
- *
- * General commonly used functionality.
  */
 package wile.rsgauges.libmc.detail;
 
@@ -13,15 +11,17 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,10 +29,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModList;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
@@ -50,7 +49,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 public class Auxiliaries
 {
@@ -90,7 +88,7 @@ public class Auxiliaries
   public static boolean isShiftDown()
   {
     return (InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT) ||
-      InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT));
+            InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT));
   }
 
   @OnlyIn(Dist.CLIENT)
@@ -98,7 +96,7 @@ public class Auxiliaries
   public static boolean isCtrlDown()
   {
     return (InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL) ||
-      InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_CONTROL));
+            InputConstants.isKeyDown(SidedProxy.mc().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_CONTROL));
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -118,10 +116,6 @@ public class Auxiliaries
   // Localization, text formatting
   // -------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * Text localization wrapper, implicitly prepends `MODID` to the
-   * translation keys. Forces formatting argument, nullable if no special formatting shall be applied..
-   */
   public static MutableComponent localizable(String modtrkey, Object... args)
   { return Component.translatable((modtrkey.startsWith("block.") || (modtrkey.startsWith("item."))) ? (modtrkey) : (modid+"."+modtrkey), args); }
 
@@ -145,7 +139,6 @@ public class Auxiliaries
     tr.withStyle(ChatFormatting.RESET);
     final String ft = tr.getString();
     if(ft.contains("${")) {
-      // Non-recursive, non-argument lang file entry cross referencing.
       Pattern pt = Pattern.compile("\\$\\{([^}]+)\\}");
       Matcher mt = pt.matcher(ft);
       StringBuffer sb = new StringBuffer();
@@ -174,9 +167,6 @@ public class Auxiliaries
     }
   }
 
-  /**
-   * Returns true if a given key is translated for the current language.
-   */
   @OnlyIn(Dist.CLIENT)
   public static boolean hasTranslation(String key)
   { return net.minecraft.client.resources.language.I18n.exists(key); }
@@ -191,15 +181,9 @@ public class Auxiliaries
     public static boolean helpCondition()
     { return isShiftDown() && isCtrlDown(); }
 
-    /**
-     * Adds an extended tooltip or help tooltip depending on the key states of CTRL and SHIFT.
-     * Returns true if the localisable help/tip was added, false if not (either not CTL/SHIFT or
-     * no translation found).
-     */
     @OnlyIn(Dist.CLIENT)
     public static boolean addInformation(@Nullable String advancedTooltipTranslationKey, @Nullable String helpTranslationKey, List<Component> tooltip, TooltipFlag flag, boolean addAdvancedTooltipHints)
     {
-      // Note: intentionally not using keybinding here, this must be `control` or `shift`.
       final boolean help_available = (helpTranslationKey != null) && Auxiliaries.hasTranslation(helpTranslationKey + ".help");
       final boolean tip_available = (advancedTooltipTranslationKey != null) && Auxiliaries.hasTranslation(helpTranslationKey + ".tip");
       if((!help_available) && (!tip_available)) return false;
@@ -220,13 +204,9 @@ public class Auxiliaries
       return true;
     }
 
-    /**
-     * Adds an extended tooltip or help tooltip for a given stack depending on the key states of CTRL and SHIFT.
-     * Format in the lang file is (e.g. for items): "item.MODID.REGISTRYNAME.tip" and "item.MODID.REGISTRYNAME.help".
-     * Return value see method pattern above.
-     */
+    // UPDATE 1.21.1: Parameter von `BlockGetter` auf `Item.TooltipContext` geändert
     @OnlyIn(Dist.CLIENT)
-    public static boolean addInformation(ItemStack stack, @Nullable BlockGetter world, List<Component> tooltip, TooltipFlag flag, boolean addAdvancedTooltipHints)
+    public static boolean addInformation(ItemStack stack, @Nullable Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag, boolean addAdvancedTooltipHints)
     { return addInformation(stack.getDescriptionId(), stack.getDescriptionId(), tooltip, flag, addAdvancedTooltipHints); }
 
     @OnlyIn(Dist.CLIENT)
@@ -236,7 +216,6 @@ public class Auxiliaries
       tooltip.add(Component.literal(localize(translation_key).replaceAll("\\s+$","").replaceAll("^\\s+", "")).withStyle(ChatFormatting.GRAY));
       return true;
     }
-
   }
 
   @SuppressWarnings("unused")
@@ -246,55 +225,48 @@ public class Auxiliaries
     if(!s.isEmpty()) player.sendSystemMessage(Component.translatable(s));
   }
 
+  // UPDATE 1.21.1: Serialisierung von TextComponents
   public static @Nullable Component unserializeTextComponent(String serialized)
-  { return Component.Serializer.fromJson(serialized); }
-
-  public static String serializeTextComponent(Component tc)
-  { return (tc==null) ? ("") : (Component.Serializer.toJson(tc)); }
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // Tag Handling
-  // -------------------------------------------------------------------------------------------------------------------
-
-  @SuppressWarnings("deprecation")
-  public static boolean isInItemTag(Item item, ResourceLocation tag)
   {
-    return ForgeRegistries.ITEMS.tags().stream().filter(tg->tg.getKey().location().equals(tag)).anyMatch(tk->tk.contains(item));
+    try {
+      return Component.Serializer.fromJson(serialized, net.minecraft.core.RegistryAccess.EMPTY);
+    } catch(Exception e) {
+      return Component.literal(serialized);
+    }
   }
 
-  @SuppressWarnings("deprecation")
+  public static String serializeTextComponent(Component tc)
+  { return (tc==null) ? ("") : (Component.Serializer.toJson(tc, net.minecraft.core.RegistryAccess.EMPTY)); }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Tag Handling (UPDATE 1.21.1)
+  // -------------------------------------------------------------------------------------------------------------------
+
+  public static boolean isInItemTag(Item item, ResourceLocation tag)
+  {
+    return item.builtInRegistryHolder().is(TagKey.create(Registries.ITEM, tag));
+  }
+
   public static boolean isInBlockTag(Block block, ResourceLocation tag)
-  { return ForgeRegistries.BLOCKS.tags().stream().filter(tg->tg.getKey().location().equals(tag)).anyMatch(tk->tk.contains(block)); }
+  {
+    return block.builtInRegistryHolder().is(TagKey.create(Registries.BLOCK, tag));
+  }
 
   // -------------------------------------------------------------------------------------------------------------------
-  // Item NBT data
+  // Item Data Components (UPDATE 1.21.1: Ersetzt das alte NBT-System für Namen)
   // -------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * Equivalent to getDisplayName(), returns null if no custom name is set.
-   */
   public static @Nullable Component getItemLabel(ItemStack stack)
   {
-    CompoundTag nbt = stack.getTagElement("display");
-    if(nbt != null && nbt.contains("Name", 8)) {
-      try {
-        Component tc = unserializeTextComponent(nbt.getString("Name"));
-        if(tc != null) return tc;
-        nbt.remove("Name");
-      } catch(Exception e) {
-        nbt.remove("Name");
-      }
-    }
-    return null;
+    return stack.get(DataComponents.CUSTOM_NAME);
   }
 
   public static ItemStack setItemLabel(ItemStack stack, @Nullable Component name)
   {
     if(name != null) {
-      CompoundTag nbt = stack.getOrCreateTagElement("display");
-      nbt.putString("Name", serializeTextComponent(name));
+      stack.set(DataComponents.CUSTOM_NAME, name);
     } else {
-      if(stack.hasTag()) stack.removeTagKey("display");
+      stack.remove(DataComponents.CUSTOM_NAME);
     }
     return stack;
   }
@@ -411,12 +383,12 @@ public class Auxiliaries
     public static BlockPosRange of(AABB range)
     {
       return new BlockPosRange(
-        (int)Math.floor(range.minX),
-        (int)Math.floor(range.minY),
-        (int)Math.floor(range.minZ),
-        (int)Math.floor(range.maxX-.0625),
-        (int)Math.floor(range.maxY-.0625),
-        (int)Math.floor(range.maxZ-.0625)
+              (int)Math.floor(range.minX),
+              (int)Math.floor(range.minY),
+              (int)Math.floor(range.minZ),
+              (int)Math.floor(range.maxX-.0625),
+              (int)Math.floor(range.maxY-.0625),
+              (int)Math.floor(range.maxZ-.0625)
       );
     }
 
@@ -519,11 +491,10 @@ public class Auxiliaries
   public static void logGitVersion(String mod_name)
   {
     try {
-      // Done during construction to have an exact version in case of a crash while registering.
       String version = Auxiliaries.loadResourceText("/.gitversion-" + modid).trim();
       logInfo(mod_name+((version.isEmpty())?(" (dev build)"):(" GIT id #"+version)) + ".");
     } catch(Throwable e) {
-      // (void)e; well, then not. Priority is not to get unneeded crashes because of version logging.
+      // Ignoriert
     }
   }
 }

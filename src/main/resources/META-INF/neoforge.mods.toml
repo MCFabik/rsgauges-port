@@ -1,0 +1,28 @@
+# Das hier ist zwingend für NeoForge 21.1 (Minecraft 1.21.1)
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="rsgauges"
+version="1.2.22"
+displayName="Gauges and Switches"
+# WICHTIG: Füge diese Zeile hinzu, falls sie fehlt:
+# (In manchen Versionen von NeoForge ist das Feld optional,
+# aber der Fehler deutet darauf hin, dass es hier hakt)
+# interface="net.neoforged.fml.ModContainer"
+
+[[dependencies.rsgauges]]
+modId="neoforge"
+type="required"
+# Das hier behebt den "Missing language neoforge version [4,)" Fehler:
+versionRange="[21,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.rsgauges]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,)"
+ordering="NONE"
+side="BOTH"

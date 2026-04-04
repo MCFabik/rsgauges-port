@@ -1,5 +1,5 @@
 {
-  "alarm_siren_sound": {
+  "alarm_siren": {
     "category": "block",
     "subtitle": "rsgauges.subtitle.soundindicator1",
     "sounds": [ "rsgauges:soundindicator1" ]

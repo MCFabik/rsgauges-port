@@ -21,10 +21,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class EnvironmentalSensorSwitchBlock extends AutoSwitchBlock
     { super(te_type, pos, state); }
 
     public EnvironmentalSensorSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_ENVSENSOR_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("tet_envsensor_switch"), pos, state); }
 
     public double threshold0_on()
     { return threshold0_on_; }
@@ -177,7 +177,7 @@ public class EnvironmentalSensorSwitchBlock extends AutoSwitchBlock
     @Override
     public void tick()
     {
-      if((!hasLevel()) || (getLevel().isClientSide) || (--update_timer_ > 0)) return;
+      if((!hasLevel()) || (getLevel().isClientSide()) || (--update_timer_ > 0)) return;
       if(update_interval_ < 10) update_interval_ = 10;
       update_timer_ = update_interval_ + (int)(Math.random()*5); // sensor timing noise using rnd
       BlockState state = getLevel().getBlockState(getBlockPos());

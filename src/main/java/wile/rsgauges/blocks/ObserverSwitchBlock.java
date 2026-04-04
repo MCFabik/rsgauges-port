@@ -27,11 +27,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.BlockCategories;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class ObserverSwitchBlock extends SwitchBlock
     { super(te_type, pos, state); }
 
     public ObserverSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_OBSERVER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("tet_observer_switch"), pos, state); }
 
     int debounce()
     { return debounce_; }
@@ -200,8 +200,8 @@ public class ObserverSwitchBlock extends SwitchBlock
         }
         tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.output_power", ChatFormatting.RED, new Object[]{setpower()})));
         tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.blocksensor.filter",
-          ChatFormatting.DARK_GREEN,
-          new Object[]{Component.translatable("rsgauges.switchconfig.blocksensor.filter."+filter_name())})
+                ChatFormatting.DARK_GREEN,
+                new Object[]{Component.translatable("rsgauges.switchconfig.blocksensor.filter."+filter_name())})
         ));
         Overlay.show(player, Auxiliaries.localizable("switchconfig.blocksensor", ChatFormatting.RESET, tr.toArray()));
       }
@@ -215,7 +215,7 @@ public class ObserverSwitchBlock extends SwitchBlock
     @SuppressWarnings("deprecation")
     public void tick()
     {
-      if(level.isClientSide() || (--update_timer_ > 0)) return;
+      if(level == null || level.isClientSide() || (--update_timer_ > 0)) return;
       update_timer_ = ((range_ <= 1) ? 20 : 10) + ((int)(Math.random()*3)); // Neighbours are fast updated using neighbourChanged notifications.
       final BlockState state = level.getBlockState(worldPosition);
       if((state==null) || (!(state.getBlock() instanceof final ObserverSwitchBlock block))) return;

@@ -3,8 +3,6 @@
  * @author Stefan Wilhelm (wile)
  * @copyright (C) 2018 Stefan Wilhelm
  * @license MIT (see https://opensource.org/licenses/MIT)
- *
- * Autoswitch, specialised for fast sampling rate interval timing.
  */
 package wile.rsgauges.blocks;
 
@@ -21,11 +19,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -40,10 +38,6 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
   public IntervalTimerSwitchBlock(long config, BlockBehaviour.Properties properties, AABB unrotatedBBUnpowered, @Nullable AABB unrotatedBBPowered)
   { super(config, properties, unrotatedBBUnpowered, unrotatedBBPowered, null, null); }
 
-  // -------------------------------------------------------------------------------------------------------------------
-  // Block overrides
-  // -------------------------------------------------------------------------------------------------------------------
-
   @Override
   @Nullable
   public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
@@ -56,10 +50,6 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
     if(!(state.getBlock() instanceof IntervalTimerSwitchBlock)) return Optional.empty();
     return Optional.of(state.getValue(POWERED) ? 15 : 0);
   }
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // Tile entity
-  // -------------------------------------------------------------------------------------------------------------------
 
   /**
    * Tile entity for timer interval based switches
@@ -74,7 +64,7 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
     { super(te_type, pos, state); }
 
     public IntervalTimerSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_TIMER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("te_intervaltimer_switch"), pos, state); }
 
     private int p_set_  = 15;
     private int t_on_  = 20;
@@ -161,10 +151,10 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
       if((state == null) || (!(state.getBlock() instanceof SwitchBlock))) return false;
       final int direction = (y >= 13) ? (1) : ((y <= 2) ? (-1) : (0));
       final int field = ((x>=2) && (x<=3.95)) ? (1) : (
-        ((x>=4.25) && (x<=7)) ? (2) : (
-          ((x>=8) && (x<=10)) ? (3) : (
-            ((x>=11) && (x<=13)) ? (4) : (0)
-          )));
+              ((x>=4.25) && (x<=7)) ? (2) : (
+                      ((x>=8) && (x<=10)) ? (3) : (
+                              ((x>=11) && (x<=13)) ? (4) : (0)
+                      )));
       final boolean selected = ((direction!=0) && (field!=0));
       if(selected && (!show_only)) {
         switch (field) {
@@ -226,6 +216,7 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
         }
       }
       if(p != p_) {
+        // FIX: setpower(int) wird nun in SwitchBlock bereitgestellt!
         setpower((inverted() ? (15-p_) : (p_)));
         BlockState state = getLevel().getBlockState(getBlockPos());
         if((state==null) || (!(state.getBlock() instanceof AutoSwitchBlock)) || (!state.getValue(POWERED))) {
@@ -237,5 +228,4 @@ public class IntervalTimerSwitchBlock extends AutoSwitchBlock
       }
     }
   }
-
 }

@@ -18,12 +18,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import wile.rsgauges.ModContent;
 import wile.rsgauges.blocks.EnvironmentalSensorSwitchBlock.EnvironmentalSensorSwitchTileEntity;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.detail.RsAuxiliaries;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
+import wile.rsgauges.libmc.detail.Registries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class DayTimerSwitchBlock extends AutoSwitchBlock
     { super(te_type, pos, state); }
 
     public DayTimerSwitchTileEntity(BlockPos pos, BlockState state)
-    { super(ModContent.TET_DAYTIMER_SWITCH, pos, state); }
+    { super(Registries.getBlockEntityType("tet_daytimer_switch"), pos, state); }
 
     @Override
     public boolean activation_config(BlockState state, @Nullable Player player, double x, double y, boolean show_only)
@@ -115,7 +115,7 @@ public class DayTimerSwitchBlock extends AutoSwitchBlock
     @Override
     public void tick()
     {
-      if((!hasLevel()) || (getLevel().isClientSide) || (--update_timer_ > 0)) return;
+      if((!hasLevel()) || (getLevel().isClientSide()) || (--update_timer_ > 0)) return;
       if(update_interval_ < 10) update_interval_ = 10;
       update_timer_ = update_interval_ + (int)(Math.random()*5); // sensor timing noise using rnd
       BlockState state = getBlockState();
