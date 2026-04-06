@@ -1,102 +1,67 @@
+# RsGauges (Unofficial NeoForge Port for 1.21.1)
 
-## Gauges and Switches (MC1.19.x)
+![Project Header](https://cdn.modrinth.com/data/zLqnXw6d/images/194a5c28e973f38e959cd58d2629bc30db3a3233.png)
 
-Mod sources for Minecraft version 1.19.x.
+This is an **unofficial port** of the original **RsGauges** (Gauges and Switches) mod to **Minecraft 1.21.1** using the **NeoForge** loader.
 
-- Description, credits, and features: Please see the readme in the repository root.
+This version is based on the 1.20.1 port by **Waffle**, which in turn was based on the original work by **Wile**. This project aims to keep the functional gauges, switches, and sensors available for the latest Minecraft versions.
 
-- Compiled mod distribution channel is curseforge: https://www.curseforge.com/minecraft/mc-mods/redstone-gauges-and-switches/files.
+The Mod adds devices to output or measure redstone power in different style variants.
 
-----
-## Version history
+---
 
-    - v1.2.18    [U] Initial 1.19.2 port (PR#71, by Damian).
+## 🛠 Features
 
-    - v1.2.17    [F] Removed Analog Link Receiver output inversion.
+### Switches
+* **Buttons & Levers:** Wide variety of designs.
+* **Pressure Plates:** Normal ("contact switches") and shock-sensitive versions (detect when something falls on it).
+* **Detectors:** Entity detectors (players, villagers, animals, mobs, etc.) and block category detectors (e.g. "solid", "ore", "wood", "sapling", "farmland", "water", "liquid", etc.).
+* **Timers:** Day timers (06:00 to 24:00) and interval timers (tick-based).
+* **Environment Sensors:** Light sensors, rain sensors, and lightning sensors ("auto switch" category).
+* **Specialized:** Switch-Link relays/receivers (optimized for wireless transmission), knock sensors (seismic detection), and trapdoor switches.
 
-    - v1.2.16    [F] Minor formatting adaptions in lang files.
-                 [F] Fixed `#soils` tag (issue #53, ty pavog).
+### Gauges
+* **Analog & Digital:** Displays redstone power from 0 to 15.
+* **Indicators:** LEDs, semaphores, and alarm lamps.
+* **Sound Indicators:** Alarm sirens and bells.
+* **Sensitive Glass:** Glass that emits light or changes color.
 
-    - v1.2.16-b1 [U] Updated to 1.18.2.
+### Style Variants
+Includes various series like **Industrial**, **Retro Industrial**, **Rustic**, **Old Fancy**, and **Glass**. You can configure exactly which series you like to include to fit your world theme.
 
-    - v1.2.15    [A] French translation added (PR#56, dracnis).
+### Special Features
+* **Configuration:** All switches can be configured to weak/strong and inverted/not inverted with a Redstone Torch.
+* **Wireless:** Most switches can be wireless linked with Ender Pearls.
+* **Pulse Duration:** Pulse duration of buttons is configurable with a Redstone Dust stack.
+* **Coloring:** Some switches and gauges can be colored with dye.
+* **Detection Logic:** Some plates can react to or ignore players, mobs, villagers, animals, items, etc.
 
-    - v1.2.14    [M] Added Comparator Switch sample rate config setting.
-                 [F] Alarm Siren sound emission fixed.
+---
 
-    - v1.2.13    [R] Release build.
+## 📜 Credits & History
+To respect the original developers and maintain the history of this project:
+* **Original Mod & Sources:** Created by [Wile (stfwi)](https://github.com/stfwi/rsgauges/).
+* **1.20.1 Port & Sources:** Created by [Waffle (ialwaysaskedforthat)](https://github.com/ialwaysaskedforthat/rsgauges).
+* **1.21.1 NeoForge Port:** Updated and maintained by me.
 
-    - v1.2.13-b2 [F] Fixed Link Receiver signal modes (issue #48, ty graywaren).
-                 [F] Updated Forge/gradle.
+---
 
-    - v1.2.13-b1 [U] Initial 1.18.1 port.
+## 🎥 References & Documentation
+* **Mod description video by VegaCraft (German, 2023):** [Watch here](https://youtu.be/ilhDJH2xN64)
+* **Mod description video by Debitor (German, 2020):** [Watch here](https://youtu.be/YO5DByAv71k)
+* Full documentation and feature details are available on the [original GitHub project page](https://github.com/stfwi/rsgauges/).
 
-    - v1.2.12    [U] Mappings ported, updated to Forge 1.16.5-36.2.0.
+---
 
-    - v1.2.11    [F] Lang file fixes.
+## 💻 Technical Information
+* **Loader:** NeoForge
+* **Minecraft Version:** 1.21.1
+* **Java Version:** 21
 
-    - v1.2.10    [A] Dimmer Switch can be used as analog Switch Link source.
-                 [A] Industrial Analog Switch Link Receiver added.
-                 [A] Industrial Analog Switch Link Transmitter added.
-                 [F] Comparator Switch link triggering bug fixed.
+---
 
-    - v1.2.9     [F] Lang file update zh_cn (PR#41, ty kappa-maintainer).
-                 [F] Fixed Power Plant documentation (issue#42, ty Artin).
+## 📜 License
+This project follows the original licensing. Please check the `LICENSE` file in this repository for details.
 
-    - v1.2.9-b1  [F] Fixed Stained Redstone Sensitive Glass recipe (issue #40).
-
-    - v1.2.8     [R] Release build.
-                 [U] MC1.16.5 enabled.
-                 [M] Block materials unified.
-
-    - v1.2.7     [R] Release build v1.2.7.
-                 [F] Opt-out config pack level based.
-
-    - v1.2.7-b2  [F] Config load/apply condition fixed.
-
-    - v1.2.7-b1  [A] Analog Switch Linking signals added.
-                 [A] Gauges and Indicators can be wirelessly connected to switches.
-                 [A] Comparator Switch and Link Sender support analog data transmissions.
-                 [A] Elevator Button up/down arrows added depending on where the wall is
-                     clicked when placing.
-
-    - v1.2.6     [R] Release build  1.2.6.
-
-    - v1.2.6-b2  [A] Gauges can be explicitly set to Comparator-Input mode (click with a Redstone Torch).
-                 [A] Auto switch buttons only display the current configurations on first click.
-
-    - v1.2.6-b1  [U] Ported to 1.16.4.
-
-    - v1.2.5     [R] Release build 1.2.5.
-
-    - v1.2.5-b1  [A] Linked switches are marked with particles when holding the Switch Link Pearl.
-                 [U] Partial internal code refurbishments.
-
-    - v1.2.4     [U] Updated to Forge 1.16.3-34.1.0.
-                 [A] Indicators and Gauges are invertible (input from Vallen while Forgecraft'ing).
-                 [F] Ambient occlusion and GUI lightning fixes.
-
-    - v1.2.4-b8  [U] Ported to MC1.16.3.
-
-    - v1.2.4-b7  [U] Updated Forge to 33.0.37 (breaking change).
-
-    - v1.2.4-b6  [U] Updated Forge, adapted new mappings to 20200723-1.16.1.
-                 [F] Fixed Contact Switch detection range.
-
-    - v1.2.4-b5  [F] Mapping adaption to Forge 1.16.2-33.0.20.
-
-    - v1.2.4-b4  [U] Ported to 1.16.2.
-
-    - v1.2.4-b2  [F] Door sensor look detection angle fixed.
-                 [A] JEI integration added.
-                 [F] Fixed startup issue by updating to Forge 32.0.97 (issue #28, ty wieselkatze).
-
-    - v1.2.4-b1  [M] Coloring of Sensitive Glass ported.
-                 [F] Indicator power issue fixed.
-
-    - v1.2.4-a2  [A] Sensitive glass ported, overlay frame style ported.
-                 [M] Modified global switch power placement default setting to strong.
-
-    - v1.2.4-a1  [A] Initial port.
-
-----
+## 🐞 Bug Reports
+Please report issues regarding this 1.21.1 version only in the **Issue Tracker**. Do **not** contact the original authors (Wile or Waffle) for bugs found in this specific port.
