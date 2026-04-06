@@ -330,5 +330,6 @@
   "rsgauges.switchlinking.switchlink_pearl.use.targetgone": "Der Zielschalter wurde versetzt oder entfernt",
   "rsgauges.switchlinking.switchlink_pearl.use.toofaraway": "Der Zielschalter ist zu weit weg von dir",
   "rsgauges.switchlinking.target_assign.error_notarget": "Dieser Schalter kann nicht durch Links aktiviert werden",
-  "rsgauges.switchlinking.target_assign.ok": "Zielschalter gemerkt"
+  "rsgauges.switchlinking.target_assign.ok": "Zielschalter gemerkt",
+  "block.rsgauges.industrialswitch": "Industrieschalter"
 }

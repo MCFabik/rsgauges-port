@@ -13,11 +13,11 @@ base {
     archivesName = mod_id
 }
 
-// Wie gewünscht: Java 25 Toolchain
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+// Wie gewünscht: Java 21 Toolchain
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
-    version = "21.1.221"
+    version = "21.1.222"
 
     runs {
         client {

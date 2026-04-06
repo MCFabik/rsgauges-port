@@ -68,7 +68,7 @@ public class ModContent {
 
   public static void init(String modid) {
     detail.MODID = modid;
-    ModResources.init(); // WICHTIG: Erzwingt Registrierung der Sounds VOR den Blöcken
+    ModResources.init();
     initTags();
     initBlocks();
     initItems();
@@ -1064,6 +1064,97 @@ public class ModContent {
             detail.colored_sensitive_glass_block_properties()
     ), SensitiveGlassBlock.class);
 
+// 1. DUMMY-BLOCK
+    Registries.addBlock("industrialswitch_top", () -> new Block(
+            BlockBehaviour.Properties.of().mapColor(MapColor.NONE).noOcclusion().sound(SoundType.METAL).strength(0.5f, 15f).pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)
+    ) {
+      @Override
+      protected net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof BistableSwitchBlock) {
+          return stateBelow.useWithoutItem(level, player, hit.withPosition(below));
+        }
+        return net.minecraft.world.InteractionResult.PASS;
+      }
+
+      @Override
+      public net.minecraft.world.level.block.state.BlockState playerWillDestroy(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.entity.player.Player player) {
+        net.minecraft.core.BlockPos below = pos.below();
+        if (level.getBlockState(below).is(ModContent.getBlock("industrialswitch"))) {
+          level.destroyBlock(below, true, player);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+      }
+
+      @Override
+      public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof BistableSwitchBlock) {
+          return stateBelow.getShape(level, below, context);
+        }
+        return net.minecraft.world.level.block.Block.box(0, 0, 0, 16, 16, 8);
+      }
+
+      @Override
+      public net.minecraft.world.level.block.RenderShape getRenderShape(net.minecraft.world.level.block.state.BlockState state) {
+        return net.minecraft.world.level.block.RenderShape.INVISIBLE;
+      }
+
+      @Override
+      public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        return new net.minecraft.world.item.ItemStack(ModContent.getBlock("industrialswitch"));
+      }
+    }, Block.class);
+
+    // 2. DER ECHTE SCHALTER (Jetzt mit UP und DOWN Unterstützung)
+    Registries.addBlock("industrialswitch", () -> new BistableSwitchBlock(
+            SwitchBlock.RSBLOCK_CONFIG_CUTOUT | SwitchBlock.SWITCH_CONFIG_BISTABLE |
+                    SwitchBlock.SWITCH_CONFIG_WEAKABLE | SwitchBlock.SWITCH_CONFIG_INVERTABLE |
+                    SwitchBlock.SWITCH_CONFIG_LINK_TARGET_SUPPORT | SwitchBlock.SWITCH_CONFIG_LINK_SOURCE_SUPPORT,
+            detail.switch_metallic_block_properties(),
+            Auxiliaries.getPixeledAABB(0, 0, 0, 16, 16, 16),
+            null
+    ) {
+      @Override
+      public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        net.minecraft.core.Direction facing = net.minecraft.core.Direction.NORTH;
+
+        if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING)) {
+          facing = state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING);
+        } else if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING)) {
+          facing = state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING);
+        }
+
+        switch (facing) {
+          case NORTH: return net.minecraft.world.level.block.Block.box(0, 0, 0, 16, 16, 8);
+          case SOUTH: return net.minecraft.world.level.block.Block.box(0, 0, 8, 16, 16, 16);
+          case WEST:  return net.minecraft.world.level.block.Block.box(0, 0, 0, 8, 16, 16);
+          case EAST:  return net.minecraft.world.level.block.Block.box(8, 0, 0, 16, 16, 16);
+          case UP:    return net.minecraft.world.level.block.Block.box(0, 0, 8, 16, 16, 16);
+          case DOWN:  return net.minecraft.world.level.block.Block.box(0, 0, 8, 16, 16, 16);
+          default:    return net.minecraft.world.level.block.Block.box(0, 0, 0, 16, 16, 8);
+        }
+      }
+
+      @Override
+      public void setPlacedBy(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (level.getBlockState(pos.above()).canBeReplaced()) {
+          level.setBlock(pos.above(), ModContent.getBlock("industrialswitch_top").defaultBlockState(), 3);
+        }
+      }
+
+      @Override
+      public net.minecraft.world.level.block.state.BlockState playerWillDestroy(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.entity.player.Player player) {
+        if (level.getBlockState(pos.above()).is(ModContent.getBlock("industrialswitch_top"))) {
+          level.setBlock(pos.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+      }
+    }, BistableSwitchBlock.class);
+
     // --- TILE ENTITIES ---
     Registries.addBlockEntityType("te_gauge", AbstractGaugeBlock.GaugeTileEntity::new,
             "industrial_analog_angular_gauge", "industrial_analog_horizontal_gauge",
@@ -1090,7 +1181,7 @@ public class ModContent {
             "industrial_switchlink_cased_receiver", "industrial_switchlink_pulse_receiver",
             "industrial_switchlink_cased_pulse_receiver", "industrial_switchlink_relay",
             "industrial_switchlink_relay_analog", "industrial_switchlink_pulse_relay",
-            "industrial_knock_switch", "industrial_knock_button"
+            "industrial_knock_switch", "industrial_knock_button", "industrialswitch"
     );
 
     Registries.addBlockEntityType("te_contact_switch", ContactSwitchBlock.ContactSwitchTileEntity::new,

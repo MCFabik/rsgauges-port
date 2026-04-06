@@ -5,17 +5,19 @@ license="MIT"
 
 [[mods]]
 modId="rsgauges"
-version="1.2.22"
+version="1.1.0"
 displayName="Gauges and Switches"
-# WICHTIG: Füge diese Zeile hinzu, falls sie fehlt:
-# (In manchen Versionen von NeoForge ist das Feld optional,
-# aber der Fehler deutet darauf hin, dass es hier hakt)
-# interface="net.neoforged.fml.ModContainer"
+description='''
+Adds redstone metering gauges, levers, buttons, pressure plates, and all sorts of other sensors and detector switches to the game.
+'''
+authors="MCFabikDE"
+credits="wilechaote & Waffle919185 for the original Mod/ported Mod"
+displayURL="https://github.com/MCFabik/rsgauges-port"
+logoFile="logo2.png"
 
 [[dependencies.rsgauges]]
 modId="neoforge"
 type="required"
-# Das hier behebt den "Missing language neoforge version [4,)" Fehler:
 versionRange="[21,)"
 ordering="NONE"
 side="BOTH"

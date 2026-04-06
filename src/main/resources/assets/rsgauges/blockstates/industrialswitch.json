@@ -1,0 +1,17 @@
+{
+  "variants": {
+    "facing=north,powered=false": { "model": "rsgauges:block/industrialswitch/industrialswitch", "y": 180 },
+    "facing=east,powered=false":  { "model": "rsgauges:block/industrialswitch/industrialswitch", "y": 270 },
+    "facing=south,powered=false": { "model": "rsgauges:block/industrialswitch/industrialswitch" },
+    "facing=west,powered=false":  { "model": "rsgauges:block/industrialswitch/industrialswitch", "y": 90 },
+    "facing=up,powered=false":    { "model": "rsgauges:block/industrialswitch/industrialswitch" },
+    "facing=down,powered=false":  { "model": "rsgauges:block/industrialswitch/industrialswitch" },
+
+    "facing=north,powered=true":  { "model": "rsgauges:block/industrialswitch/industrialswitchon", "y": 180 },
+    "facing=east,powered=true":   { "model": "rsgauges:block/industrialswitch/industrialswitchon", "y": 270 },
+    "facing=south,powered=true":  { "model": "rsgauges:block/industrialswitch/industrialswitchon" },
+    "facing=west,powered=true":   { "model": "rsgauges:block/industrialswitch/industrialswitchon", "y": 90 },
+    "facing=up,powered=true":     { "model": "rsgauges:block/industrialswitch/industrialswitchon" },
+    "facing=down,powered=true":   { "model": "rsgauges:block/industrialswitch/industrialswitchon" }
+  }
+}

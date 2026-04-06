@@ -1,0 +1,10 @@
+{
+  "parent": "rsgauges:custom/industrial_switch_on",
+  "textures": {
+    "all": "rsgauges:block/industrialswitch/switch_2",
+    "particle": "rsgauges:block/industrialswitch/switch_2",
+    "1": "rsgauges:block/industrialswitch/switch_2",
+    "3": "rsgauges:block/industrialswitch/industrial_switch_black"
+  },
+  "render_type": "solid"
+}

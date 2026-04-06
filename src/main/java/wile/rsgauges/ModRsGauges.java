@@ -66,6 +66,12 @@ public class ModRsGauges
       Registries.getRegisteredItems().forEach(item -> {
         // Wir holen den Registrierungsnamen, um die Opt-Out Config zu prüfen
         String name = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+
+        // HIER IST DER TÜRSTEHER FÜR DEN DUMMY-BLOCK:
+        if (name.equals("industrialswitch_top")) {
+          return; // Überspringt dieses Item und macht beim nächsten weiter!
+        }
+
         if (!wile.rsgauges.ModConfig.isOptedOut(name)) {
           event.accept(item);
         }

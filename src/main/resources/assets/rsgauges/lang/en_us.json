@@ -330,5 +330,6 @@
   "rsgauges.switchlinking.switchlink_pearl.use.targetgone": "Target switch is broken or relocated",
   "rsgauges.switchlinking.switchlink_pearl.use.toofaraway": "Target switch is too far away from you",
   "rsgauges.switchlinking.target_assign.error_notarget": "This switch cannot be a link target",
-  "rsgauges.switchlinking.target_assign.ok": "Target switch memorized"
+  "rsgauges.switchlinking.target_assign.ok": "Target switch memorized",
+  "block.rsgauges.industrialswitch": "Industrial Switch"
 }
