@@ -32,7 +32,7 @@ import java.util.List;
 @Mod(ModRsGauges.MODID)
 public class ModRsGauges
 {
-  public static final String MODID = "rsgaugesported";
+  public static final String MODID = "rsgauges";
   public static final String MODNAME = "Gauges and Switches";
   public static final int VERSION_DATAFIXER = 0;
   private static final Logger LOGGER = LogManager.getLogger();
