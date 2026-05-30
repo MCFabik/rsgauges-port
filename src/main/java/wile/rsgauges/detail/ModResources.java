@@ -9,7 +9,7 @@ package wile.rsgauges.detail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -47,7 +47,7 @@ public class ModResources
   /**
    * Block sound player class
    */
-  @SuppressWarnings("unused")
+
   public static final class BlockSoundEvent
   {
     final Supplier<SoundEvent> se_;

@@ -106,7 +106,6 @@ public class DayTimerSwitchBlock extends AutoSwitchBlock
         } else {
           tr.add(Component.literal(""));
         }
-        tr.add(separator.copy().append(Auxiliaries.localizable("switchconfig.daytimerclock.output_power", ChatFormatting.RED, new Object[]{setpower()})));
         Overlay.show(player, Auxiliaries.localizable("switchconfig.daytimerclock", ChatFormatting.RESET, tr.toArray()));
       }
       return true;

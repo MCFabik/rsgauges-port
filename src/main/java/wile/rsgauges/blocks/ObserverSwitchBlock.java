@@ -212,7 +212,7 @@ public class ObserverSwitchBlock extends SwitchBlock
     { if(update_timer_ > 2) update_timer_ = 0; } // cooldown time to prevent state jitters
 
     @Override
-    @SuppressWarnings("deprecation")
+
     public void tick()
     {
       if(level == null || level.isClientSide() || (--update_timer_ > 0)) return;

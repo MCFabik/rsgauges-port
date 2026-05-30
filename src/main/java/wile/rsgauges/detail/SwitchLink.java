@@ -32,6 +32,7 @@ import java.util.Optional;
  * Class representing the link functionality of the switch link pearls.
  * It has no purpose without this item, for which it is embedded in the item class.
  */
+@SuppressWarnings("deprecation")
 public class SwitchLink
 {
   public interface ISwitchLinkable
@@ -154,7 +155,7 @@ public class SwitchLink
   public boolean isTooFar(final BlockPos pos)
   { return (ModConfig.max_switch_linking_distance() > 0) && (((distance(pos) > ModConfig.max_switch_linking_distance()))); }
 
-  @SuppressWarnings("deprecation")
+
   @Nullable
   private ISwitchLinkable target(final Level world, final BlockPos source_pos)
   {
@@ -165,7 +166,7 @@ public class SwitchLink
     return (ISwitchLinkable)block;
   }
 
-  @SuppressWarnings("deprecation")
+
   public RequestResult trigger(final Level world, final BlockPos source_pos, final Player player)
   {
     if(ModConfig.without_switch_linking()) return RequestResult.NOT_MATCHED;
@@ -184,7 +185,7 @@ public class SwitchLink
     return target.switchLinkTrigger(this);
   }
 
-  @SuppressWarnings("deprecation")
+
   public RequestResult trigger(final Level world, final BlockPos source_pos, int analog_power, int digital_power, boolean state_changed)
   {
     final ISwitchLinkable target = target(world, source_pos);

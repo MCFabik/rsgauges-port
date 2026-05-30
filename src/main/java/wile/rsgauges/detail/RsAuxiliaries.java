@@ -40,7 +40,7 @@ public class RsAuxiliaries
    * Transforms a block position, rotated around the world origin from EAST
    * to facing.
    */
-  @SuppressWarnings("unused")
+
   public static BlockPos transform_forward(final BlockPos pos, final Direction facing)
   {
     return switch (facing.get3DDataValue()) {

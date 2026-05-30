@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("deprecation")
 public class Auxiliaries
 {
   private static String modid;
@@ -218,7 +219,7 @@ public class Auxiliaries
     }
   }
 
-  @SuppressWarnings("unused")
+
   public static void playerChatMessage(final Player player, final String message)
   {
     String s = message.trim();

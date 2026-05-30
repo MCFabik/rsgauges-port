@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +27,7 @@ public class Registries {
   private static DeferredRegister.Items ITEMS;
   private static DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES;
   private static DeferredRegister<CreativeModeTab> CREATIVE_TABS;
+  public static DeferredRegister<MenuType<?>> MENUS;
 
   // Sound Registry für NeoForge 1.21.1
   public static DeferredRegister<SoundEvent> SOUND_EVENTS;
@@ -42,6 +44,7 @@ public class Registries {
     BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, MODID);
     CREATIVE_TABS = DeferredRegister.create(BuiltInRegistries.CREATIVE_MODE_TAB, MODID);
     SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, MODID);
+    MENUS = DeferredRegister.create(BuiltInRegistries.MENU, MODID);
 
     RSGAUGES_TAB_KEY = ResourceKey.create(BuiltInRegistries.CREATIVE_MODE_TAB.key(), ResourceLocation.fromNamespaceAndPath(MODID, "rsgauges_tab"));
 
@@ -62,6 +65,7 @@ public class Registries {
     BLOCK_ENTITY_TYPES.register(bus);
     CREATIVE_TABS.register(bus);
     SOUND_EVENTS.register(bus);
+    MENUS.register(bus);
   }
 
   public static <T extends Block> DeferredHolder<Block, T> addBlock(String name, Supplier<T> blockFactory, Class<T> blockClass) {

@@ -28,6 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("deprecation")
 public abstract class RsDirectedBlock extends RsBlock
 {
   public static final long RSBLOCK_CONFIG_WALLMOUNT         = 0x4000000000000000l;
@@ -119,7 +120,7 @@ public abstract class RsDirectedBlock extends RsBlock
     return state.setValue(FACING, facing);
   }
 
-  @SuppressWarnings("unused")
+
   @Override
   public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos currentPos, BlockPos facingPos)
   {

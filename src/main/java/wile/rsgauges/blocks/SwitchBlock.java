@@ -13,7 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
+
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
+
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -59,7 +59,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchLink.ISwitchLinkable
+public class SwitchBlock extends RsDirectedBlock implements SwitchLink.ISwitchLinkable
 {
   public static final long SWITCH_DATA_POWERED_POWER_MASK       = 0x000000000000000fl;
   public static final long SWITCH_DATA_INVERTED                 = 0x0000000000000100l;
@@ -91,10 +91,10 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
   public static final long SWITCH_CONFIG_SENSOR_LIGHT           = 0x0000001000000000l;
   public static final long SWITCH_CONFIG_SENSOR_RAIN            = 0x0000002000000000l;
   public static final long SWITCH_CONFIG_SENSOR_LIGHTNING       = 0x0000004000000000l;
-  public static final long SWITCH_CONFIG_SENSOR_BLOCKDETECT     = 0x0000008000000000l;
-  public static final long SWITCH_CONFIG_SENSOR_DETECTOR        = SWITCH_CONFIG_SENSOR_VOLUME|SWITCH_CONFIG_SENSOR_LINEAR;
-  public static final long SWITCH_CONFIG_SENSOR_ENVIRONMENTAL   = SWITCH_CONFIG_SENSOR_LIGHT|SWITCH_CONFIG_TIMER_DAYTIME|SWITCH_CONFIG_SENSOR_RAIN|SWITCH_CONFIG_SENSOR_LIGHTNING;
-  public static final long SWITCH_CONFIG_AUTOMATIC              = SWITCH_CONFIG_TIMER_INTERVAL|SWITCH_CONFIG_SENSOR_DETECTOR|SWITCH_CONFIG_SENSOR_ENVIRONMENTAL|SWITCH_CONFIG_SENSOR_BLOCKDETECT;
+  public static final long SWITCH_CONFIG_SENSOR_BLOCKDETECT     = 0x0000008000000000l|SWITCH_CONFIG_TOUCH_CONFIGURABLE;
+  public static final long SWITCH_CONFIG_SENSOR_DETECTOR        = SWITCH_CONFIG_SENSOR_VOLUME|SWITCH_CONFIG_SENSOR_LINEAR|SWITCH_CONFIG_TOUCH_CONFIGURABLE;
+  public static final long SWITCH_CONFIG_SENSOR_ENVIRONMENTAL   = SWITCH_CONFIG_SENSOR_LIGHT|SWITCH_CONFIG_TIMER_DAYTIME|SWITCH_CONFIG_SENSOR_RAIN|SWITCH_CONFIG_SENSOR_LIGHTNING|SWITCH_CONFIG_TOUCH_CONFIGURABLE;
+  public static final long SWITCH_CONFIG_AUTOMATIC              = SWITCH_CONFIG_TIMER_INTERVAL|SWITCH_CONFIG_SENSOR_DETECTOR|SWITCH_CONFIG_SENSOR_ENVIRONMENTAL|SWITCH_CONFIG_SENSOR_BLOCKDETECT|SWITCH_CONFIG_TOUCH_CONFIGURABLE;
   public static final long SWITCH_CONFIG_PROJECTILE_SENSE_ON    = 0x0000100000000000l;
   public static final long SWITCH_CONFIG_PROJECTILE_SENSE_OFF   = 0x0000200000000000l;
   public static final long SWITCH_CONFIG_PROJECTILE_SENSE       = SWITCH_CONFIG_PROJECTILE_SENSE_ON|SWITCH_CONFIG_PROJECTILE_SENSE_OFF;
@@ -657,7 +657,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
 
     public MutableComponent configStatusTextComponentTranslation(SwitchBlock block)
     {
-      MutableComponent status = Auxiliaries.localizable("switchconfig.options", ChatFormatting.RESET);
+      MutableComponent status = net.minecraft.network.chat.Component.empty().withStyle(ChatFormatting.RESET);
       if(setpower() < 15 && (block == null || (block.config & (SWITCH_CONFIG_AUTOMATIC|SWITCH_CONFIG_LINK_SENDER))==0)) {
         status.append(Auxiliaries.localizable("switchconfig.options.output_power", ChatFormatting.RED, new Object[]{setpower()}));
       }
@@ -727,6 +727,52 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
     public Item item = Items.AIR;
     public int item_count = 0;
     public double x = 0, y = 0;
+    private static ClickInteraction touch(ClickInteraction ck, BlockState state, Direction facing, float x, float y, float z)
+    {
+      final SwitchBlock block = (SwitchBlock)(state.getBlock());
+      // Touch config check
+      double xo=0, yo=0;
+      if((block.isCube()) || ((block.isWallMount()) && (!block.isLateral()))) {
+        // UI facing the player in horizontal direction
+        if(!block.isCube()) {
+          if(facing != state.getValue(FACING)) return ck;
+        } else {
+          if(facing != state.getValue(FACING).getOpposite()) return ck;
+        }
+        switch (facing.get3DDataValue()) {
+          case 0 -> { xo = 1 - x; yo = 1 - z; } // DOWN
+          case 1 -> { xo = 1 - x; yo = z; } // UP
+          case 2 -> { xo = 1 - x; yo = y; } // NORTH
+          case 3 -> { xo = x; yo = y; } // SOUTH
+          case 4 -> { xo = z; yo = y; } // WEST
+          case 5 -> { xo = 1 - z; yo = y; } // EAST
+        }
+        final AABB aa = block.getShape(block.defaultBlockState().setValue(FACING, Direction.SOUTH)).bounds();
+        xo = Math.round(((xo-aa.minX) * (1.0/(aa.maxX-aa.minX)) * 15.5) - 0.25);
+        yo = Math.round(((yo-aa.minY) * (1.0/(aa.maxY-aa.minY)) * 15.5) - 0.25);
+      } else if(block.isLateral()) {
+        // Floor mounted UI facing up
+        if(facing != Direction.UP) return ck;
+        facing = state.getValue(FACING);
+        switch (facing.get3DDataValue()) {
+          case 0 -> { xo = x; yo = z; } // DOWN
+          case 1 -> { xo = x; yo = z; } // UP
+          case 2 -> { xo = x; yo = 1 - z; } // NORTH
+          case 3 -> { xo = 1 - x; yo = z; } // SOUTH
+          case 4 -> { xo = 1 - z; yo = 1 - x; } // WEST
+          case 5 -> { xo = z; yo = x; } // EAST
+        }
+        final AABB aa = block.getShape(block.defaultBlockState().setValue(FACING, Direction.NORTH)).bounds();
+        xo = 0.1 * Math.round(10.0 * (((xo-aa.minX) * (1.0/(aa.maxX-aa.minX)) * 15.5) - 0.25));
+        yo = 0.1 * Math.round(10.0 * (((yo-(1.0-aa.maxZ)) * (1.0/(aa.maxZ-aa.minZ)) * 15.5) - 0.25));
+      } else {
+        return ck;
+      }
+      ck.x = ((xo > 15.0) ? (15.0) : (Math.max(xo, 0.0)));
+      ck.y = ((yo > 15.0) ? (15.0) : (Math.max(yo, 0.0)));
+      ck.touch_configured = true;
+      return ck;
+    }
 
     public static ClickInteraction get(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
     {
@@ -757,15 +803,7 @@ public class SwitchBlock extends RsDirectedBlock implements EntityBlock, SwitchL
       }
 
       if(facing != null && (block.config & SWITCH_CONFIG_TOUCH_CONFIGURABLE) != 0 && !ck.wrenched && ck.item != Items.REDSTONE && ck.item != Items.ENDER_PEARL && ck.item != Registries.getItem("switchlink_pearl")) {
-        ck.touch_configured = true;
-        switch(facing) {
-          case UP:    ck.x = x*16f; ck.y = z*16f; break;
-          case DOWN:  ck.x = x*16f; ck.y = (1f-z)*16f; break;
-          case NORTH: ck.x = (1f-x)*16f; ck.y = y*16f; break;
-          case SOUTH: ck.x = x*16f; ck.y = y*16f; break;
-          case WEST:  ck.x = z*16f; ck.y = y*16f; break;
-          case EAST:  ck.x = (1f-z)*16f; ck.y = y*16f; break;
-        }
+        return touch(ck, state, facing, x, y, z);
       }
       return ck;
     }

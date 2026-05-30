@@ -28,6 +28,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import wile.rsgauges.ModRsGauges;
+import wile.rsgauges.network.TeleportPacket;
+import wile.rsgauges.network.RenameChipPacket;
 
 import java.util.function.BiConsumer;
 
@@ -54,6 +56,8 @@ public class Networking
     registrar.playToServer(PacketContainerSyncClientToServer.TYPE, PacketContainerSyncClientToServer.STREAM_CODEC, PacketContainerSyncClientToServer::handle);
     registrar.playToClient(PacketContainerSyncServerToClient.TYPE, PacketContainerSyncServerToClient.STREAM_CODEC, PacketContainerSyncServerToClient::handle);
     registrar.playToClient(OverlayTextMessage.TYPE, OverlayTextMessage.STREAM_CODEC, OverlayTextMessage::handle);
+    registrar.playToServer(TeleportPacket.TYPE, TeleportPacket.STREAM_CODEC, TeleportPacket::handle);
+    registrar.playToServer(RenameChipPacket.TYPE, RenameChipPacket.STREAM_CODEC, RenameChipPacket::handle);
   }
 
   // --------------------------------------------------------------------------------------------------------------------

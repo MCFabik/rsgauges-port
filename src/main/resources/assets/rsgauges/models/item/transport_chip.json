@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "rsgauges:item/transport_chip"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "rsgauges:programmed": 1.0
+      },
+      "model": "rsgauges:item/encoded_transport_chip"
+    }
+  ]
+}

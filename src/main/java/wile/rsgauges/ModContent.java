@@ -2,6 +2,7 @@ package wile.rsgauges;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -11,13 +12,19 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import wile.rsgauges.blocks.*;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.items.SwitchLinkPearlItem;
+import wile.rsgauges.items.TransportChipItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Registries;
 
 public class ModContent {
+  public static final DeferredHolder<MenuType<?>, MenuType<TransportTerminalMenu>> TRANSPORT_TERMINAL_MENU = Registries.MENUS.register("transport_terminal", () -> IMenuTypeExtension.create(TransportTerminalMenu::new));
+  public static DeferredHolder<BlockEntityType<?>, BlockEntityType<TransportTerminalBlockEntity>> TRANSPORT_TERMINAL_BLOCK_ENTITY;
+
   private static class detail {
     public static String MODID = "";
 
@@ -90,6 +97,8 @@ public class ModContent {
   }
 
   public static void initBlocks() {
+    Registries.addBlock("transport_terminal", () -> new TransportTerminalBlock(BlockBehaviour.Properties.of().strength(2.0f)), TransportTerminalBlock.class);
+
     Registries.addBlock("industrial_small_lever", () -> new BistableSwitchBlock(
             SwitchBlock.RSBLOCK_CONFIG_CUTOUT |
                     SwitchBlock.SWITCH_CONFIG_BISTABLE | SwitchBlock.SWITCH_CONFIG_WALLMOUNT |
@@ -1156,6 +1165,8 @@ public class ModContent {
     }, BistableSwitchBlock.class);
 
     // --- TILE ENTITIES ---
+    TRANSPORT_TERMINAL_BLOCK_ENTITY = Registries.addBlockEntityType("transport_terminal", TransportTerminalBlockEntity::new, "transport_terminal");
+
     Registries.addBlockEntityType("te_gauge", AbstractGaugeBlock.GaugeTileEntity::new,
             "industrial_analog_angular_gauge", "industrial_analog_horizontal_gauge",
             "industrial_vertical_bar_gauge", "industrial_small_digital_gauge",
@@ -1225,6 +1236,7 @@ public class ModContent {
 
   public static void initItems() {
     Registries.addItem("switchlink_pearl", () -> new SwitchLinkPearlItem(detail.default_item_properties()));
+    Registries.addItem("transport_chip", () -> new TransportChipItem(detail.default_item_properties()));
   }
 
   public static Block getBlock(String name) { return Registries.getBlock(name); }

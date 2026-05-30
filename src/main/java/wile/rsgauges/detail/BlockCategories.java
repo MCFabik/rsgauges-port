@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class BlockCategories
 {
   private static final String MODID = ModRsGauges.MODID;

@@ -34,7 +34,7 @@ import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Overlay;
 import wile.rsgauges.libmc.detail.Registries;
 
-import javax.annotation.Nullable;
+
 import java.util.List;
 
 public class SwitchLinkPearlItem extends RsItem

@@ -10,7 +10,9 @@ package wile.rsgauges;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -20,14 +22,14 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wile.rsgauges.detail.BlockCategories;
+import wile.rsgauges.detail.CapabilityHandler;
 import wile.rsgauges.libmc.detail.*;
 
-import java.util.List;
 
 @Mod(ModRsGauges.MODID)
 public class ModRsGauges
@@ -36,6 +38,26 @@ public class ModRsGauges
   public static final String MODNAME = "Gauges and Switches";
   public static final int VERSION_DATAFIXER = 0;
   private static final Logger LOGGER = LogManager.getLogger();
+  private static Boolean energyModsLoaded = null;
+
+  public static boolean isEnergyModLoaded() {
+      if (energyModsLoaded == null) {
+          String[] energyMods = {
+              "mekanism", "thermal", "thermalexpansion", "enderio", "powah",
+              "createaddition", "fluxnetworks", "nuclearcraft", "immersiveengineering",
+              "rftoolsbase", "rftoolspower", "draconicevolution", "solarflux", "energizedpower",
+              "pipez", "xnet", "integrateddynamics", "industrialforegoing", "techreborn"
+          };
+          energyModsLoaded = false;
+          for (String mod : energyMods) {
+              if (net.neoforged.fml.ModList.get().isLoaded(mod)) {
+                  energyModsLoaded = true;
+                  break;
+              }
+          }
+      }
+      return energyModsLoaded;
+  }
 
   public ModRsGauges(IEventBus modEventBus, ModContainer modContainer)
   {
@@ -52,6 +74,7 @@ public class ModRsGauges
     modEventBus.addListener(this::onClientSetup);
     modEventBus.addListener(this::addCreative);
     modEventBus.addListener(wile.rsgauges.libmc.detail.Networking::init);
+    modEventBus.register(CapabilityHandler.class);
 
     PlayerBlockInteraction.init(MODID, LOGGER);
   }
@@ -67,8 +90,8 @@ public class ModRsGauges
         // Wir holen den Registrierungsnamen, um die Opt-Out Config zu prüfen
         String name = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
 
-        // HIER IST DER TÜRSTEHER FÜR DEN DUMMY-BLOCK:
-        if (name.equals("industrialswitch_top")) {
+        // HIER IST DER TÜRSTEHER FÜR DEN DUMMY-BLOCK UND EIGENE SORTIERUNG:
+        if (name.equals("industrialswitch_top") || name.equals("transport_terminal") || name.equals("transport_chip")) {
           return; // Überspringt dieses Item und macht beim nächsten weiter!
         }
 
@@ -76,6 +99,22 @@ public class ModRsGauges
           event.accept(item);
         }
       });
+
+      // Füge Transport Terminal und Transport Chip ganz am Ende ein
+      Item transportTerminal = null;
+      Item transportChip = null;
+      for (Item item : Registries.getRegisteredItems()) {
+          String name = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+          if (name.equals("transport_terminal")) transportTerminal = item;
+          if (name.equals("transport_chip")) transportChip = item;
+      }
+      
+      if (transportTerminal != null && !wile.rsgauges.ModConfig.isOptedOut("transport_terminal")) {
+          event.accept(transportTerminal);
+      }
+      if (transportChip != null && !wile.rsgauges.ModConfig.isOptedOut("transport_chip")) {
+          event.accept(transportChip);
+      }
     }
   }
 
@@ -87,6 +126,11 @@ public class ModRsGauges
 
   public void onClientSetup(final FMLClientSetupEvent event)
   {
+    event.enqueueWork(() -> {
+      ItemProperties.register(wile.rsgauges.libmc.detail.Registries.getRegisteredItems().stream().filter(i -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(i).getPath().equals("transport_chip")).findFirst().get(), ResourceLocation.fromNamespaceAndPath(MODID, "programmed"), (stack, level, entity, seed) -> {
+          return (stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).copyTag().contains("TargetX")) ? 1.0F : 0.0F;
+      });
+    });
     Overlay.register();
     ModContent.processContentClientSide(event);
   }
@@ -108,5 +152,13 @@ public class ModRsGauges
         Auxiliaries.logger().error("Failed to load changed config: " + e.getMessage());
       }
     }
+  }
+
+  @EventBusSubscriber(modid = MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
+  public static final class ClientModEvents {
+      @SubscribeEvent
+      public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
+          event.register(ModContent.TRANSPORT_TERMINAL_MENU.get(), wile.rsgauges.blocks.TransportTerminalScreen::new);
+      }
   }
 }
