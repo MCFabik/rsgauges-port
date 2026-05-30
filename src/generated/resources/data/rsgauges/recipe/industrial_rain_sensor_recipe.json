@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_light_sensor"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_rain_sensor"
+  }
+}

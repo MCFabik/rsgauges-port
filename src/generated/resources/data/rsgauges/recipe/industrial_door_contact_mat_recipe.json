@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "tag": "rsgauges:pressure_plates"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "NN",
+    "RP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_door_contact_mat"
+  }
+}

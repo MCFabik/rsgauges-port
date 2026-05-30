@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "tag": "rsgauges:pressure_plates"
+    }
+  },
+  "pattern": [
+    "NN",
+    "GP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_contact_mat"
+  }
+}

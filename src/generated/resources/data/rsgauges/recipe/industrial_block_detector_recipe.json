@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:stone"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "NBN",
+    "NSN",
+    "NRN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_block_detector"
+  }
+}

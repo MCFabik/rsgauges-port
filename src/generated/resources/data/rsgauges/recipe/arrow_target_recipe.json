@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:arrow"
+    },
+    "B": {
+      "tag": "rsgauges:buttons"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "NAN",
+    "NBN",
+    "NRN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:arrow_target"
+  }
+}

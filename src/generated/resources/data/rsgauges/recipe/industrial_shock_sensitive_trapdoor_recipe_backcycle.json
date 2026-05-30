@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_fallthrough_detector"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_shock_sensitive_trapdoor"
+  }
+}

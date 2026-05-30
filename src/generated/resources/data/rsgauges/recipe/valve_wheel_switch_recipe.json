@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "minecraft:lever"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
+    }
+  },
+  "pattern": [
+    "RNR",
+    "NLN",
+    "RNR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:valve_wheel_switch"
+  }
+}

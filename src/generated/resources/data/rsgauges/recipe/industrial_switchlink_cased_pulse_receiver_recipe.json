@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "tag": "rsgauges:buttons"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "T": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "pattern": [
+    "IT",
+    "RB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_switchlink_cased_pulse_receiver"
+  }
+}

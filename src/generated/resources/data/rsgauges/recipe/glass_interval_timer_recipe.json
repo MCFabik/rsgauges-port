@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:glass_day_timer"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_interval_timer"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "minecraft:redstone_lamp"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "NN",
+    "RL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_alarm_lamp"
+  }
+}

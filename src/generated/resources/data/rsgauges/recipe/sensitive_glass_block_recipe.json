@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:glowstone"
+    }
+  },
+  "pattern": [
+    "NG",
+    "SR"
+  ],
+  "result": {
+    "count": 8,
+    "id": "rsgauges:sensitive_glass_block"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:switchlink_pearl"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:ender_pearl"
+  }
+}

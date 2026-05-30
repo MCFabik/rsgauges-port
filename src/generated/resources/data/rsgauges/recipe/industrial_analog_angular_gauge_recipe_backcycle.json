@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_analog_horizontal_gauge"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_analog_angular_gauge"
+  }
+}

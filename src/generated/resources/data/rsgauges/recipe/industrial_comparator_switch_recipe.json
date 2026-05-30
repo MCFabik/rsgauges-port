@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:comparator"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "NNN",
+    "RRC",
+    "NNN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_comparator_switch"
+  }
+}

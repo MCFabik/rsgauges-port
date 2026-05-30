@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:oldfancy_spring_reset_chain"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:oldfancy_small_button"
+  }
+}

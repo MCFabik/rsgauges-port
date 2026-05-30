@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "O": {
+      "item": "minecraft:observer"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "tag": "rsgauges:buttons"
+    }
+  },
+  "pattern": [
+    "NNN",
+    "NSO",
+    "NRN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_knock_button"
+  }
+}

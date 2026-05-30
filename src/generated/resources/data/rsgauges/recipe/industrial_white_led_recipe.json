@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_red_led"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_white_led"
+  }
+}

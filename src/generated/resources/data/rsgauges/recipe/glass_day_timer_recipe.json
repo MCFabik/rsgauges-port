@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:clock"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    "NN",
+    "GD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_day_timer"
+  }
+}

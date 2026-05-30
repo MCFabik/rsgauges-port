@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:glass_linear_entity_detector"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_entity_detector"
+  }
+}

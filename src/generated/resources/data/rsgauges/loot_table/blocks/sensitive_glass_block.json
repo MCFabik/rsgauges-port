@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "rsgauges:sensitive_glass_block"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "rsgauges:blocks/sensitive_glass_block"
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "tag": "rsgauges:buttons"
+    },
+    "G": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "NGN",
+    "NBN",
+    "NRN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:elevator_button"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:rustic_small_button"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:rustic_spring_reset_chain"
+  }
+}

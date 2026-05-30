@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "tag": "rsgauges:pressure_plates"
+    },
+    "D": {
+      "tag": "minecraft:doors"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "BR",
+    "DN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:door_sensor_switch"
+  }
+}

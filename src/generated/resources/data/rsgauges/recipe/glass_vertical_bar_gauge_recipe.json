@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:comparator"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "minecraft:glass"
+    }
+  },
+  "pattern": [
+    "NN",
+    "RC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_vertical_bar_gauge"
+  }
+}

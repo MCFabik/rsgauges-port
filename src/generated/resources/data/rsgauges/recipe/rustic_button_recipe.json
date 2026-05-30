@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "tag": "rsgauges:buttons"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "NN",
+    "SB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:rustic_button"
+  }
+}

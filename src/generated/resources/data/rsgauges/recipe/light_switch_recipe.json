@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:arrow_target"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:light_switch"
+  }
+}

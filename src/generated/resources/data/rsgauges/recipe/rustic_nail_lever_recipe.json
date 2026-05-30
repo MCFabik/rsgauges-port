@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:rustic_angular_lever"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:rustic_nail_lever"
+  }
+}

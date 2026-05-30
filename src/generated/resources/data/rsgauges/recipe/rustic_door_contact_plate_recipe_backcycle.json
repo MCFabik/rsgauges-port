@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:rustic_shock_sensitive_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:rustic_door_contact_plate"
+  }
+}

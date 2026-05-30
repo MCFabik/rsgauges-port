@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": {
+      "item": "minecraft:dandelion"
+    },
+    "P": {
+      "tag": "rsgauges:pressure_plates"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "SS",
+    "FP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:yellow_power_plant"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:glass_small_button"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:glass_touch_button"
+  }
+}

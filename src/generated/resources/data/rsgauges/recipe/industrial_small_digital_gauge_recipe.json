@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_vertical_bar_gauge"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_small_digital_gauge"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rsgauges:industrial_fenced_button"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rsgauges:industrial_double_pole_button"
+  }
+}
