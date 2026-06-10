@@ -18,6 +18,8 @@ import wile.rsgauges.blocks.*;
 import wile.rsgauges.detail.ModResources;
 import wile.rsgauges.items.SwitchLinkPearlItem;
 import wile.rsgauges.items.TransportChipItem;
+import wile.rsgauges.items.AwesomeSyringeItem;
+import wile.rsgauges.items.EmptySyringeItem;
 import wile.rsgauges.libmc.detail.Auxiliaries;
 import wile.rsgauges.libmc.detail.Registries;
 
@@ -1081,10 +1083,24 @@ public class ModContent {
       protected net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit) {
         net.minecraft.core.BlockPos below = pos.below();
         net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
-        if (stateBelow.getBlock() instanceof BistableSwitchBlock) {
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
           return stateBelow.useWithoutItem(level, player, hit.withPosition(below));
         }
         return net.minecraft.world.InteractionResult.PASS;
+      }
+
+      @Override
+      protected net.minecraft.world.ItemInteractionResult useItemOn(net.minecraft.world.item.ItemStack stack_held, net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
+          // wir leiten den Klick manuell weiter
+          if (stack_held.getItem() == net.minecraft.world.item.Items.ENDER_PEARL || stack_held.getItem() == wile.rsgauges.libmc.detail.Registries.getItem("switchlink_pearl")) {
+             ((IndustrialSwitchBlock)stateBelow.getBlock()).manualPearlClick(stateBelow, level, below, player);
+             return net.minecraft.world.ItemInteractionResult.CONSUME;
+          }
+        }
+        return super.useItemOn(stack_held, state, level, pos, player, hand, hit);
       }
 
       @Override
@@ -1100,7 +1116,7 @@ public class ModContent {
       public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
         net.minecraft.core.BlockPos below = pos.below();
         net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
-        if (stateBelow.getBlock() instanceof BistableSwitchBlock) {
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
           return stateBelow.getShape(level, below, context);
         }
         return net.minecraft.world.level.block.Block.box(0, 0, 0, 16, 16, 8);
@@ -1112,13 +1128,48 @@ public class ModContent {
       }
 
       @Override
+      public boolean isSignalSource(net.minecraft.world.level.block.state.BlockState state) {
+        return true;
+      }
+
+      @Override
+      public int getSignal(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, net.minecraft.core.Direction direction) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
+          return stateBelow.getSignal(level, below, direction);
+        }
+        return 0;
+      }
+
+      @Override
+      public int getDirectSignal(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, net.minecraft.core.Direction direction) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
+          return stateBelow.getDirectSignal(level, below, direction);
+        }
+        return 0;
+      }
+
+      @Override
+      public boolean canConnectRedstone(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos, @javax.annotation.Nullable net.minecraft.core.Direction side) {
+        net.minecraft.core.BlockPos below = pos.below();
+        net.minecraft.world.level.block.state.BlockState stateBelow = level.getBlockState(below);
+        if (stateBelow.getBlock() instanceof IndustrialSwitchBlock) {
+          return ((IndustrialSwitchBlock)stateBelow.getBlock()).canConnectRedstone(stateBelow, level, below, side);
+        }
+        return false;
+      }
+
+      @Override
       public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         return new net.minecraft.world.item.ItemStack(ModContent.getBlock("industrialswitch"));
       }
     }, Block.class);
 
     // 2. DER ECHTE SCHALTER (Jetzt mit UP und DOWN Unterstützung)
-    Registries.addBlock("industrialswitch", () -> new BistableSwitchBlock(
+    Registries.addBlock("industrialswitch", () -> new IndustrialSwitchBlock(
             SwitchBlock.RSBLOCK_CONFIG_CUTOUT | SwitchBlock.SWITCH_CONFIG_BISTABLE |
                     SwitchBlock.SWITCH_CONFIG_WEAKABLE | SwitchBlock.SWITCH_CONFIG_INVERTABLE |
                     SwitchBlock.SWITCH_CONFIG_LINK_TARGET_SUPPORT | SwitchBlock.SWITCH_CONFIG_LINK_SOURCE_SUPPORT,
@@ -1162,7 +1213,7 @@ public class ModContent {
         }
         return super.playerWillDestroy(level, pos, state, player);
       }
-    }, BistableSwitchBlock.class);
+    }, IndustrialSwitchBlock.class);
 
     // --- TILE ENTITIES ---
     TRANSPORT_TERMINAL_BLOCK_ENTITY = Registries.addBlockEntityType("transport_terminal", TransportTerminalBlockEntity::new, "transport_terminal");
@@ -1235,6 +1286,8 @@ public class ModContent {
   }
 
   public static void initItems() {
+    Registries.addItem("awesome_syringe", () -> new AwesomeSyringeItem(detail.default_item_properties()));
+    Registries.addItem("empty_syringe", () -> new EmptySyringeItem(detail.default_item_properties()));
     Registries.addItem("switchlink_pearl", () -> new SwitchLinkPearlItem(detail.default_item_properties()));
     Registries.addItem("transport_chip", () -> new TransportChipItem(detail.default_item_properties()));
   }

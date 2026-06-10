@@ -7,7 +7,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import wile.rsgauges.ModContent;
 import wile.rsgauges.ModRsGauges;
 
-@EventBusSubscriber(modid = ModRsGauges.MODID)
+@EventBusSubscriber(modid = ModRsGauges.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class CapabilityHandler {
     @SubscribeEvent
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {

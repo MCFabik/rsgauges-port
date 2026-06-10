@@ -135,7 +135,7 @@ public class ModRsGauges
     ModContent.processContentClientSide(event);
   }
 
-  @EventBusSubscriber(modid = MODID)
+  @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD)
   public static final class ModEvents {
     @SubscribeEvent
     public static void onConfigLoad(final ModConfigEvent.Loading event)
@@ -154,7 +154,7 @@ public class ModRsGauges
     }
   }
 
-  @EventBusSubscriber(modid = MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
+  @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = net.neoforged.api.distmarker.Dist.CLIENT)
   public static final class ClientModEvents {
       @SubscribeEvent
       public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {

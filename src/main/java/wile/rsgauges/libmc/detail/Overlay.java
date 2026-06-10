@@ -20,8 +20,8 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
-// 1.21.1 Update: bus = ... ist veraltet, NeoForge erkennt den Mod-Bus nun automatisch anhand des Events
-@EventBusSubscriber(modid = "rsgauges", value = Dist.CLIENT)
+// 1.21.1 Update: bus = ... ist veraltet, NeoForge erkennt den Mod-Bus nun automatisch anhand des Events - (Fix: Tut es nicht immer, wir erzwingen es hier wieder)
+@EventBusSubscriber(modid = "rsgauges", bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class Overlay
 {
   public static void register()

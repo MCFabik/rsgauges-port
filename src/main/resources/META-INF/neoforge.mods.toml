@@ -25,6 +25,7 @@ side="BOTH"
 [[dependencies.rsgauges]]
 modId="minecraft"
 type="required"
-versionRange="[1.21.1,)"
+# This supports all 1.21.x versions
+versionRange="[1.21,1.22)"
 ordering="NONE"
 side="BOTH"
